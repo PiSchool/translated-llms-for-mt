@@ -1,12 +1,22 @@
+from your_package_name.prompting import get_random_prompt
+from your_package_name.dataset_utils import get_eval_sentences
 import json
 import requests
-from random import sample
+import pandas as pd
 
-API_URL = "https://api-inference.huggingface.co/models/gpt2"
+"""
+Dummy API call to get translations from a LM. 
+output csv file in data/interim. WIP
+"""
+
+API_URL = "https://api-inference.huggingface.co/models/EleutherAI/gpt-j-6B"
 API_TOKEN = "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"
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
-src = "translated-llms-for-mt/data/external/flores200_dataset/dev/eng_Latn.dev"
-trans = "translated-llms-for-mt/data/external/flores200_dataset/dev/ita_Latn.dev"
+
+src_ex = "data/external/flores200_dataset/dev/eng_Latn.dev"
+trg_ex = "data/external/flores200_dataset/dev/ita_Latn.dev"
+src_eval = "data/external/flores200_dataset/devtest/eng_Latn.devtest"
+trg_eval = "data/external/flores200_dataset/devtest/ita_Latn.devtest"
 
 
 def query(payload):
@@ -15,25 +25,22 @@ def query(payload):
     return json.loads(response.content.decode("utf-8"))
 
 
-def get_prompt(src_lan: str, trans_lan: str, src: str, n: int = 5) -> str:
-    with open(src_lan) as f:
-        examples = f.readlines()
-        size = len(examples)
-        idxs = sample(list(range(size)), n)
-        src_examples = [examples[idx] for idx in idxs]
-    with open(trans_lan) as f:
-        examples = f.readlines()
-        trans_examples = [examples[idx] for idx in idxs]
-    prompt_sentences = [f"[source]: {src_examples[idx]} [target]: {trans_examples[idx]}"
-                        for idx in range(n)]
-    output = ""
-    src_formatting = f"[source]: {src} [target]:"
-    for sent in prompt_sentences:
-        output += sent
-    return output + src_formatting
+# this method may be not necessary anymore if the model changes
+def extract_string_difference(big_str: str, small_str: str) -> str:
+    small_str_len = len(small_str)
+    return big_str[small_str_len:]
 
 
-src_sent = "Il cane cammina nel parco.\n"
-prompt = get_prompt(src_lan=src, trans_lan=trans, src=src_sent, n=1)
-data = query({'inputs': prompt, 'temperature': 0.5, 'top_k': 2, 'return_full_text': False})
-pass
+trans_data = get_eval_sentences(src_lan=src_eval, trg_lan=trg_eval)
+trans_data['source'] = trans_data['source'][:10]
+trans_data['target'] = trans_data['target'][:10]
+# dumb implementation, fix later: we can ask for more than 1 translation for call, depending on the API
+for src_sent, trg_sen in zip(trans_data['source'], trans_data['target']):
+    prompt = get_random_prompt(src_lan=src_ex, trg_lan=trg_ex, src=src_sent, n=1)
+    generated_text = query({'inputs': prompt, 'temperature': 100, 'top_k': 2, 'return_full_text': True,
+                            'num_return_sequences': 3})[0]['generated_text']
+    trans_sent = extract_string_difference(generated_text, prompt)
+    trans_data['translation'].append(trans_sent)
+
+trans_df = pd.DataFrame.from_dict(trans_data)
+trans_df.to_csv(path_or_buf='data/interim/eval_dataframe.csv')
