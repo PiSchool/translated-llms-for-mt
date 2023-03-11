@@ -2,9 +2,9 @@
 from translator_api import Translator
 
 def main():
-    
+
     print("Enter the API Token for HuggingFace: ")
-    API_TOKEN = "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"#input()
+    API_TOKEN = input()
     model = "Helsinki-NLP/opus-mt-en-it"
 
     translator = Translator(API_TOKEN, model)
