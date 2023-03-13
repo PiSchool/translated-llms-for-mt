@@ -41,17 +41,17 @@ class Translator():
         for i, r in df_translation.iterrows():
             source_lang = r['source_language']
             target_lang = r['target_language']
-            if self.source_lang == source_lang & self.target_lang:
+            if self.source_lang == source_lang and self.target_lang == target_lang:
                 source_text = r['source_text']
                 translated_text = r['translated_text']
-                search_result = df_reference.loc[df_reference['source'] == source_text]
+                search_result = df_reference.loc[df_reference['en'] == source_text]
                 if len(search_result) == 1:
-                    reference_target_text = search_result['target'][0]
+                    reference_target_text = search_result['in'][0]
                     bleu_score += sentence_bleu(word_tokenize(reference_target_text), word_tokenize(translated_text))
                     cnt += 1
                 if len(search_result) > 1:
                     reference_target_text_list = []
-                    for text in search_result['target'].values:
+                    for text in search_result['in'].values:
                         token_list = word_tokenize(text)
                         reference_target_text_list.append(token_list)
                         bleu_score += corpus_bleu([reference_target_text_list], [word_tokenize(translated_text)])
