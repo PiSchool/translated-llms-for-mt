@@ -20,7 +20,7 @@ class Translator():
         df_prediction = dataframe.copy()
         df_prediction['BLEU'] = 0
         for i, r in df_prediction.iterrows():
-            bleu_score = sentence_bleu(word_tokenize(r['target']), word_tokenize(r['translation']))
+            bleu_score = sentence_bleu([word_tokenize(r['target'])], word_tokenize(r['translation']))
             df_prediction.at[i, 'BLEU'] = bleu_score
 
         save_path += 'df_prediction_with_BLEU'
