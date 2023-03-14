@@ -6,7 +6,6 @@ from nltk.translate.bleu_score import sentence_bleu, corpus_bleu
 from nltk.tokenize import word_tokenize
 import os
 
-
 class Evaluator:
 
     def calculate_bleu_score(self, df_prediction):
@@ -28,15 +27,16 @@ class Evaluator:
         df_prediction.to_csv(save_path, sep=',')
         return df_prediction
 
-    def bleu_score_from_file_path(self, prediction_file_path, sep=',', encoding='utf-8', save_path='/data/'):
+    def bleu_score_from_file_path(self, prediction_file_path, sep=',', encoding='utf-8', save_path=None):
         df_prediction = pd.read_csv(prediction_file_path, sep=sep, encoding=encoding)
         df_prediction = self.calculate_bleu_score(df_prediction)
 
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
+        if save_path:
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
+            save_path += 'df_prediction_with_BLEU'
+            df_prediction.to_csv(save_path, sep=',')
 
-        save_path += 'df_prediction_with_BLEU'
-        df_prediction.to_csv(save_path, sep=',')
         return df_prediction
 
     def calculate_corpus_bleu(self, df_translation):

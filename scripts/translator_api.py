@@ -103,7 +103,13 @@ class Translator():
         
   # This method retrieves the predictions and saves the results to a CSV file.
   # Optionally, it also returns a list of predictions as a Python list.
-  def get_predictions(self, src_language, trg_language, limit=1, modeltype="Helsinki", return_list_predictions=False):
+  def get_predictions(
+        self, src_language="data/external/flores200_dataset/devtest/eng_Latn.devtest", 
+        trg_language="data/external/flores200_dataset/devtest/ita_Latn.devtest", 
+        limit=1, 
+        modeltype="Helsinki", 
+        return_list_predictions=False
+        ):
 
     if modeltype == "t5":
       model = "t5-base"
