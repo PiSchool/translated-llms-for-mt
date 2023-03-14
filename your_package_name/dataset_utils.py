@@ -1,10 +1,4 @@
-from typing import TypedDict, List
-
-
-class TranslationData(TypedDict):
-    source: List[str]
-    target: List[str]
-    translation: List[str]
+from formatting import TranslationData
 
 
 def get_eval_sentences(src_lan: str, trg_lan: str, num_samples: int=0) -> TranslationData:
