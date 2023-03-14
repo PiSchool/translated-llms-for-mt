@@ -7,7 +7,7 @@ from nltk.tokenize import word_tokenize
 import os
 
 
-class Translator():
+class Evaluator():
 
     def __init__(
             self,
