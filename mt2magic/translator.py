@@ -1,4 +1,6 @@
 import json
+
+import pandas as pd
 import requests
 from typing import List
 from abc import abstractmethod, ABC
@@ -18,8 +20,13 @@ class Translator(ABC):
                                     headers=self.headers, data=data)
         return json.loads(response.content.decode("utf-8"))
     @abstractmethod
-    def translate(self, sentences: List[str]) -> List[str]:
+    def translate_sentences(self, sentences: List[str]) -> List[str]:
         pass
+
+    @abstractmethod
+    def translate(self, data: pd.DataFrame) -> pd.DataFrame:
+        pass
+
 
 
 

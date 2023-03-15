@@ -1,5 +1,5 @@
-# from your_package_name.prompting import get_random_prompt
-# from your_package_name.dataset_utils import get_eval_sentences
+# from mt2magic.prompting import get_random_prompt
+# from mt2magic.dataset_utils import get_eval_sentences
 
 from datasets import load_dataset
 
