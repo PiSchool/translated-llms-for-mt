@@ -1,10 +1,11 @@
 from sentence_transformers import SentenceTransformer
-from formatting import PromptConfig
+from mt2magic.formatting import PromptConfig
 from random import sample
 
 """
 Prompter for pure generative language models.
-TODO: prompting by similarity
+TODO: prompting by similarity, using a SentenceTransformer pipeline for choosing
+sentences similar to the input.
 """
 class Prompter:
     def __init__(self, config: PromptConfig):
@@ -28,6 +29,15 @@ class Prompter:
             self.model = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
 
     def get_random_prompt(self, src_sent: str) -> str:
+        """
+        Given an input sentence in the source language, it returns a prompt with both
+        source examples and the respective translations, chosen randomly in the prompter
+        pool.
+        Args
+            src_sent (:obj:`str`): sentence in the source language to be translated.
+        Returns
+            (:obj:`str`): A string with the prompt for performing translation.
+        """
         pool_size = len(self.src_pool)
         idxs = sample(list(range(pool_size)), self.n_shot)
         src_examples = [self.src_pool[idx] for idx in idxs]
@@ -41,6 +51,14 @@ class Prompter:
         return output + src_formatting
 
     def get_prompt(self, src_sent: str) -> str:
+        """
+        Given an input sentence in the source language, it returns a prompt with both
+        source examples and the respective translations, chosen accordingly to strategy
+        Args
+            src_sent (:obj:`str`): sentence in the source language to be translated.
+        Returns
+            (:obj:`str`): A string with the prompt for performing translation.
+        """
         if self.strategy == "random":
             return self.get_random_prompt(src_sent)
         else: # to implement: prompting by similarity

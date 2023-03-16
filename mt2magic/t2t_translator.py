@@ -1,4 +1,4 @@
-from translator import Translator
+from mt2magic.translator import Translator
 from typing import List
 import pandas as pd
 
@@ -32,7 +32,7 @@ class t2tTranslator(Translator):
         for sent in sentences:
             translation = self.query(
                 {"inputs": f"translate {self.src_lan} to {self.trg_lan}: " + sent,
-                "wait_for_model" : True
+                "wait_for_model": True
                  }
             )[0]["translation_text"]
             translations.append(translation)

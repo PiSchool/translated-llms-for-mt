@@ -1,4 +1,4 @@
-from translator import Translator
+from mt2magic.translator import Translator
 from typing import List
 import pandas as pd
 
@@ -36,7 +36,8 @@ class mtTranslator(Translator):
         """
         translations = []
         for sent in sentences:
-            translation = self.query({"inputs": sent, "wait_for_model": True})[0]["translation_text"]
+            translation = self.query({"inputs": sent, "wait_for_model": True
+                                      })[0]["translation_text"]
             translations.append(translation)
         return translations
 

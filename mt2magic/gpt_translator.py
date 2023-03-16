@@ -1,8 +1,8 @@
-from translator import Translator
+from mt2magic.translator import Translator
 from typing import List
-from formatting import Parameters, PromptConfig
+from mt2magic.formatting import Parameters, PromptConfig
 import pandas as pd
-from prompter import Prompter
+from mt2magic.prompter import Prompter
 
 """
 Pure generative language model class. 
