@@ -1,5 +1,5 @@
-from your_package_name.prompting import get_random_prompt
-from your_package_name.dataset_utils import get_eval_sentences
+from mt2magic.prompting import get_random_prompt
+from mt2magic.dataset_utils import get_eval_sentences
 import json
 import requests
 import pandas as pd
@@ -37,10 +37,10 @@ trans_data['target'] = trans_data['target'][:10]
 # dumb implementation, fix later: we can ask for more than 1 translation for call, depending on the API
 for src_sent, trg_sen in zip(trans_data['source'], trans_data['target']):
     prompt = get_random_prompt(src_lan=src_ex, trg_lan=trg_ex, src=src_sent, n=1)
-    generated_text = query({'inputs': prompt, 'temperature': 100, 'top_k': 2, 'return_full_text': True,
-                            'num_return_sequences': 3})[0]['generated_text']
+    generated_text = query({'inputs': prompt,  'parameters': {'return_full_text': False,
+                            'max_new_tokens': 70} })[0]['generated_text']
     trans_sent = extract_string_difference(generated_text, prompt)
     trans_data['translation'].append(trans_sent)
-
+pass
 trans_df = pd.DataFrame.from_dict(trans_data)
 trans_df.to_csv(path_or_buf='data/interim/eval_dataframe.csv')

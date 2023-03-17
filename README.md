@@ -27,7 +27,7 @@ Update appropriately before handing over this repository. You may want to add ot
 │
 ├── setup.py           <- makes project pip installable (pip install -e .) so 
 │                         that `your_package_name` can be imported
-└── your_package_name  <- Source code for use in this project
+└── mt2magic  <- Source code for use in this project
     ├── __init__.py    <- (Optional) Makes `your_package_name` a Python module
     └── *.py           <- Other Python source files (can also be organized in 
                           one or more subdirectories)
