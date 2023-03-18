@@ -4,9 +4,10 @@ logging.disable(logging.CRITICAL)
 import pandas as pd
 import nltk
 nltk.download('punkt')
+from nltk.tokenize import word_tokenize
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu
 from nltk.translate.chrf_score import sentence_chrf, corpus_chrf
-from nltk.tokenize import word_tokenize
+from nltk.translate.bleu_score import SmoothingFunction
 from comet import download_model, load_from_checkpoint
 
 
@@ -17,8 +18,10 @@ class Evaluator:
             Calculating the sentence BLEU score for each translation.
         """
         df_evaluation['BLEU'] = 0
+        smoothie = SmoothingFunction().method4
         for i, r in df_evaluation.iterrows():
-            bleu_score = sentence_bleu([word_tokenize(r['target'])], word_tokenize(r['translation']))
+            bleu_score = sentence_bleu([word_tokenize(r['target'])], word_tokenize(r['translation'])
+                                       , smoothing_function=smoothie)
             df_evaluation.at[i, 'BLEU'] = bleu_score
 
         return df_evaluation
@@ -121,7 +124,8 @@ class Evaluator:
         for sentence in df_evaluation['translation'].values:
             hypotheses.append(word_tokenize(sentence))
 
-        return corpus_bleu(list_of_references, hypotheses)
+        smoothie = SmoothingFunction().method4
+        return corpus_bleu(list_of_references, hypotheses, smoothing_function=smoothie)
 
     def calculate_mean_bleu(self, df_evaluation):
         """
