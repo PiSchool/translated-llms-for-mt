@@ -12,7 +12,9 @@ class TranslationData(TypedDict):
     source: List[str]
     target: List[str]
     translation: List[str]
-    score: List[float]
+    BLEU: List[float]
+    chrf: List[float]
+    COMET: List[float]
 
 class Parameters(TypedDict):
     """
