@@ -10,6 +10,8 @@ from nltk.translate.chrf_score import sentence_chrf, corpus_chrf
 from nltk.translate.bleu_score import SmoothingFunction
 from comet import download_model, load_from_checkpoint
 
+from nltk.tokenize import word_tokenize
+import os
 
 class Evaluator:
 
@@ -105,11 +107,12 @@ class Evaluator:
         df_evaluation = self.calculate_sentence_chrf(df_evaluation)
         df_evaluation = self.calculate_COMET(df_evaluation)
 
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
+        if save_path:
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
+            save_path += 'df_prediction_with_BLEU'
+            df_evaluation.to_csv(save_path, sep=',')
 
-        save_path += 'df_prediction_with_BLEU'
-        df_evaluation.to_csv(save_path, sep=',')
         return df_evaluation
 
     def calculate_corpus_bleu(self, df_evaluation):
