@@ -34,7 +34,10 @@ Update appropriately before handing over this repository. You may want to add ot
 ```
 
 ## How to install
-Instructions on how to install the package (can simply amount to setting up a virtual environment and installing the required dependencies).
+Simple installation from PyPI
+```
+pip install -r requirements.txt 
+```
 
 ## Additional data
 Instructions on how to download additional data (datasets, pre-trained models, ...) needed for running the code, specifically any kind of data that cannot be stored in this repo due to its large size.
