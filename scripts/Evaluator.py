@@ -1,19 +1,24 @@
-import os
 import logging
+
 logging.disable(logging.CRITICAL)
 import pandas as pd
+import torch
 import nltk
+
 nltk.download('punkt')
-from nltk.tokenize import word_tokenize
-from nltk.translate.bleu_score import sentence_bleu, corpus_bleu
+from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
 from nltk.translate.chrf_score import sentence_chrf, corpus_chrf
-from nltk.translate.bleu_score import SmoothingFunction
 from comet import download_model, load_from_checkpoint
 
 from nltk.tokenize import word_tokenize
 import os
 
+
 class Evaluator:
+
+    def __init__(self, model_name='Unbabel/wmt22-comet-da'):
+
+        self.COMET_model_path = download_model(model_name, saving_directory='./models/')
 
     def calculate_sentence_bleu(self, df_evaluation):
         """
@@ -39,8 +44,7 @@ class Evaluator:
 
         return df_evaluation
 
-    def calculate_COMET(self, df_evaluation, model_name='Unbabel/wmt22-comet-da'
-                                     , batch_size=8, gpu_numbers=1):
+    def calculate_COMET(self, df_evaluation, batch_size=8, gpu_numbers=1):
         """
             Calculating the COMET score for each translation.
             model_name (:obj:`str`): Model name of COMET library from below link:
@@ -51,8 +55,12 @@ class Evaluator:
                 batch_size (:obj: 'int'): batch_size
                 gpu_numbers (:obj: 'int'): Number of GPUs
         """
-        model_path = download_model(model_name)
-        model = load_from_checkpoint(model_path)
+        if torch.cuda.is_available():
+            gpu_numbers = gpu_numbers
+        else:
+            gpu_numbers = 0
+
+        model = load_from_checkpoint(self.COMET_model_path)
         df_evaluation['COMET'] = 0
         for i, r in df_evaluation.iterrows():
             data = [
@@ -62,12 +70,13 @@ class Evaluator:
                     'ref': r['target']
                 }
             ]
-            model_output = model.predict(data, batch_size=batch_size, gpus = gpu_numbers)
+            model_output = model.predict(data, batch_size=batch_size, gpus=gpu_numbers)
             df_evaluation.at[i, 'COMET'] = model_output.scores[0]
 
         return df_evaluation
 
-    def evaluating_from_dataframe(self, dataframe, save_path='/data/'):
+    def evaluating_from_dataframe(self, dataframe, save_path='/data/df_result_with_evaluation.csv'
+                                  , COMET_model_batch_size=8, COMET_model_gpu_numbers=1):
         """
                     Evaluating translations from privided csv file path.
                     Keys and Values:
@@ -80,16 +89,17 @@ class Evaluator:
         df_evaluation = dataframe.copy()
         df_evaluation = self.calculate_sentence_bleu(df_evaluation)
         df_evaluation = self.calculate_sentence_chrf(df_evaluation)
-        df_evaluation = self.calculate_COMET(df_evaluation)
+        df_evaluation = self.calculate_COMET(df_evaluation
+                                             , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
 
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 
-        save_path += 'df_prediction_with_BLEU'
         df_evaluation.to_csv(save_path, sep=',')
         return df_evaluation
 
-    def evaluating_from_file_path(self, prediction_file_path, sep=',', encoding='utf-8', save_path='/data/'):
+    def evaluating_from_file_path(self, prediction_file_path, sep=',', encoding='utf-8', save_path='/data/'
+                                  , COMET_model_batch_size=8, COMET_model_gpu_numbers=1):
         """
                     Evaluating translations from privided csv file path.
                     Keys and Values:
@@ -105,14 +115,13 @@ class Evaluator:
         df_evaluation = pd.read_csv(prediction_file_path, sep=sep, encoding=encoding)
         df_evaluation = self.calculate_sentence_bleu(df_evaluation)
         df_evaluation = self.calculate_sentence_chrf(df_evaluation)
-        df_evaluation = self.calculate_COMET(df_evaluation)
+        df_evaluation = self.calculate_COMET(df_evaluation
+                                             , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
 
-        if save_path:
-            if not os.path.exists(save_path):
-                os.makedirs(save_path)
-            save_path += 'df_prediction_with_BLEU'
-            df_evaluation.to_csv(save_path, sep=',')
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
 
+        df_evaluation.to_csv(save_path, sep=',')
         return df_evaluation
 
     def calculate_corpus_bleu(self, df_evaluation):
@@ -158,8 +167,7 @@ class Evaluator:
         mean_bleu = df_evaluation.loc[:, 'chrf'].mean()
         return mean_bleu
 
-    def calculate_system_score_COMET(self, df_evaluation, model_name='Unbabel/wmt22-comet-da'
-                                     , batch_size=256, gpu_numbers=1):
+    def calculate_system_score_COMET(self, df_evaluation, batch_size=256, gpu_numbers=1):
         """
             Calculate system_score (mean) COMET score over entire translations.
             Keys and Values:
@@ -175,9 +183,12 @@ class Evaluator:
             Output:
                 system_score (:obj: 'float'): The mean COMET score over entire translations.
         """
+        if torch.cuda.is_available():
+            gpu_numbers = gpu_numbers
+        else:
+            gpu_numbers = 0
 
-        model_path = download_model(model_name)
-        model = load_from_checkpoint(model_path)
+        model = load_from_checkpoint(self.COMET_model_path)
 
         data_list = []
         for i, r in df_evaluation.iterrows():
