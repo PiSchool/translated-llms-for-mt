@@ -4,6 +4,7 @@ from typing import TypedDict, List, Union
 File that contains structures of the types we're using.
 """
 
+
 class TranslationData(TypedDict):
     """
     Agreed data formatting for csv files.
@@ -16,6 +17,7 @@ class TranslationData(TypedDict):
     chrf: List[float]
     COMET: List[float]
 
+
 class Parameters(TypedDict):
     """
     Dictionary that contains parameters to make API calls for generative models.
@@ -25,6 +27,41 @@ class Parameters(TypedDict):
     return_full_text: bool
     max_new_tokens: int
     wait_for_model: bool
+
+
+class ModernMT_Parameters(TypedDict):
+    """
+        Dictionary that contains parameters to make API calls for modernMT.
+        For complete documentation:
+        https://www.modernmt.com/api/?python
+    """
+    priority: str
+    multiline: bool
+    timeout: int
+    format: str
+    alt_translations: int
+
+class GPT3_Parameters(TypedDict):
+    """
+        Dictionary that contains parameters to make API calls for open.ai GPT3.
+        For complete documentation:
+        https://platform.openai.com/docs/api-reference/completions/create
+    """
+    suffix: str
+    max_tokens: int
+    temperature: float
+    top_p: float
+    n: int
+    stream: bool
+    logprobs: int
+    echo: bool
+    stop: Union[str, List]
+    presence_penalty: float
+    frequency_penalty: float
+    best_of: int
+    logit_bias: dict
+    user: str
+
 
 class PromptConfig(TypedDict):
     """
@@ -42,4 +79,3 @@ class PromptConfig(TypedDict):
     src_pool: List[str]
     trg_pool: List[str]
     model: Union[str, None]
-

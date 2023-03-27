@@ -1,12 +1,16 @@
 import pandas as pd
 from modernmt import ModernMT
 
+from mt2magic.formatting import ModernMT_Parameters
+
 
 class modernMT_translator(object):
-    def __init__(self, api_key, source_lang, target_lang, platform=None, platform_version=None) -> None:
+    def __init__(self, api_key, source_lang, target_lang, platform=None, platform_version=None
+                 , param: ModernMT_Parameters = None) -> None:
         self.mmt = ModernMT(api_key, platform, platform_version)
         self.source_lang = source_lang
         self.target_lang = target_lang
+        self.parameters = param
 
     def list_supported_languages(self):
         """
@@ -19,7 +23,7 @@ class modernMT_translator(object):
         """
         return self.mmt.list_supported_languages()
 
-    def translate_sentences(self, q, context_vector=None, hints=None, options= None):
+    def translate_sentences(self, q, context_vector=None, hints=None):
         """
         Allows to translate an input text or a list of texts.
         Args
@@ -40,7 +44,7 @@ class modernMT_translator(object):
         """
 
         translation = self.mmt.translate(self.source_lang, self.target_lang, q
-                                         , context_vector=context_vector, hints=hints, options=options)
+                                         , context_vector=context_vector, hints=hints, options=self.parameters)
         if type(translation) is list:
             translation_list = []
             for trans in translation:
@@ -49,7 +53,7 @@ class modernMT_translator(object):
         else:
             return translation.translation
 
-    def translate(self, data: pd.DataFrame) -> pd.DataFrame:
+    def translate(self, data: pd.DataFrame, context_vector=None, hints=None) -> pd.DataFrame:
         """
         Main method to perform translation. Given a df as input,
         it returns a df with the "translation" column filled.
@@ -62,7 +66,7 @@ class modernMT_translator(object):
                                             column filled.
         """
         source_sentences = data["source"].to_list()
-        data["translation"] = self.translate(source_sentences)
+        data["translation"] = self.translate_sentences(source_sentences, context_vector, hints)
         return data
 
     def set_languages(self, source_lang: str, target_lang: str) -> None:
@@ -74,3 +78,13 @@ class modernMT_translator(object):
         """
         self.source_lang = source_lang
         self.target_lang = target_lang
+
+    def set_model_parameters(self, param: ModernMT_Parameters):
+        """
+        Set model parameters to perform inference.
+        For the complete list of parameters cfr your_pacakge_name.formatting.ModernMT_Parameters
+        Args
+            param (:obj:`ModernMT_Parameters`): parameters of modernMT model.
+        """
+        self.parameters = param
+
