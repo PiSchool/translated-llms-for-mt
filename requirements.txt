@@ -1,3 +1,5 @@
- pandas==1.4.4
- nltk==3.8.1
+pandas==1.4.4
+nltk==3.8.1
 unbabel-comet==2.0.0
+modernmt==1.1.0
+openai==0.27.2
