@@ -27,7 +27,7 @@ class Evaluator:
         df_evaluation['BLEU'] = 0
         smoothie = SmoothingFunction().method4
         for i, r in df_evaluation.iterrows():
-            bleu_score = sentence_bleu([word_tokenize(r['target'])], word_tokenize(r['translation'])
+            bleu_score = sentence_bleu([word_tokenize(str(r['target']))], word_tokenize(str(r['translation']))
                                        , smoothing_function=smoothie)
             df_evaluation.at[i, 'BLEU'] = bleu_score
 
@@ -39,7 +39,7 @@ class Evaluator:
         """
         df_evaluation['chrf'] = 0
         for i, r in df_evaluation.iterrows():
-            chrf_score = sentence_chrf((r['target']), r['translation'])
+            chrf_score = sentence_chrf((str(r['target'])), str(r['translation']))
             df_evaluation.at[i, 'chrf'] = chrf_score
 
         return df_evaluation
@@ -65,9 +65,9 @@ class Evaluator:
         for i, r in df_evaluation.iterrows():
             data = [
                 {
-                    'src': r['source'],
-                    'mt': r['translation'],
-                    'ref': r['target']
+                    'src': str(r['source']),
+                    'mt': str(r['translation']),
+                    'ref': str(r['target'])
                 }
             ]
             model_output = model.predict(data, batch_size=batch_size, gpus=gpu_numbers)
@@ -128,11 +128,11 @@ class Evaluator:
         """
         list_of_references = []
         for sentence in df_evaluation['target'].values:
-            list_of_references.append([word_tokenize(sentence)])
+            list_of_references.append([word_tokenize(str(sentence))])
 
         hypotheses = []
         for sentence in df_evaluation['translation'].values:
-            hypotheses.append(word_tokenize(sentence))
+            hypotheses.append(word_tokenize(str(sentence)))
 
         smoothie = SmoothingFunction().method4
         return corpus_bleu(list_of_references, hypotheses, smoothing_function=smoothie)
@@ -150,11 +150,11 @@ class Evaluator:
         """
         list_of_references = []
         for sentence in df_evaluation['target'].values:
-            list_of_references.append([sentence])
+            list_of_references.append([str(sentence)])
 
         hypotheses = []
         for sentence in df_evaluation['translation'].values:
-            hypotheses.append([sentence])
+            hypotheses.append([str(sentence)])
 
         return corpus_chrf(list_of_references, hypotheses)
 
@@ -191,9 +191,9 @@ class Evaluator:
         data_list = []
         for i, r in df_evaluation.iterrows():
             data = {
-                'src': r['source'],
-                'mt': r['translation'],
-                'ref': r['target']
+                'src': str(r['source']),
+                'mt': str(r['translation']),
+                'ref': str(r['target'])
             }
             data_list.append(data)
 
