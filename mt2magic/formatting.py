@@ -1,4 +1,5 @@
-from typing import TypedDict, List, Union
+from typing import TypedDict, List, Optional
+import pandas as pd
 
 """
 File that contains structures of the types we're using.
@@ -16,6 +17,14 @@ class TranslationData(TypedDict):
     chrf: List[float]
     COMET: List[float]
 
+class PrompterData(TypedDict):
+    """
+    pd.DataFrame formatting passed to the Prompter
+    """
+    source: List[str]
+    target: List[str]
+    label: Optional[List[str]]
+
 class Parameters(TypedDict):
     """
     Dictionary that contains parameters to make API calls for generative models.
@@ -32,14 +41,12 @@ class PromptConfig(TypedDict):
     Keys and Values:
         n_shots (:obj:`int`): number of examples to include in the prompt
         strategy (:obj:`str`): strategy to use to perform sampling of the examples
-                               (can be either "random" or "similar")
-        src_pool (:obj:`list`): list of examples for the source langauge
-        trg_pool (:obj:`list`): list of examples for the target langauge
-        model (:obj:`str`): SentenceTransformer model to use if strategy is set to "similar"
+                               (can be either "random", "fuzzy" or "labeled")
+        pool (:obj:`pd.DataFrame`): data formatted as in mt2magic.formatting.PrompterData
+        embeddings_path (:obj:`str`): path to the tensor file with the source pool embeddings
     """
     n_shots: int
     strategy: str
-    src_pool: List[str]
-    trg_pool: List[str]
-    model: Union[str, None]
+    pool: pd.DataFrame
+    embeddings_path: str
 
