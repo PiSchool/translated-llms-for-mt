@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Optional
+from typing import TypedDict, List, Optional, Union
 import pandas as pd
 
 """
@@ -57,20 +57,20 @@ class GPT3_Parameters(TypedDict):
         For complete documentation:
         https://platform.openai.com/docs/api-reference/completions/create
     """
-    suffix: str
+    #suffix: str
     max_tokens: int
     temperature: float
-    top_p: float
-    n: int
-    stream: bool
-    logprobs: int
-    echo: bool
+    #top_p: float
+    #n: int
+    #stream: bool
+    #logprobs: int
+    #echo: bool
     stop: Union[str, List]
-    presence_penalty: float
-    frequency_penalty: float
-    best_of: int
-    logit_bias: dict
-    user: str
+    #presence_penalty: float
+    #frequency_penalty: float
+    #best_of: int
+    #logit_bias: dict
+    #user: str
 
 
 class PromptConfig(TypedDict):
@@ -87,6 +87,5 @@ class PromptConfig(TypedDict):
     strategy: str
     pool: pd.DataFrame
     embeddings_path: str
-    model: Union[str, None]
 
 

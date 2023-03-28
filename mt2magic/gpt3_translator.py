@@ -43,18 +43,19 @@ class gpt3_translator:
         translations = []
         for sent in sentences:
             prompt = self.prompter.get_prompt(src_sent=sent)
-            output = openai.Completion.create(model=self.model_name, prompt=prompt
-                                              , suffix=self.parameters['suffix'],
-                                              max_tokens=self.parameters['max_tokens']
-                                              , temperature=self.parameters['temperature'],
-                                              top_p=self.parameters['top_p']
-                                              , n=self.parameters['n'], stream=self.parameters['stream']
-                                              , logprobs=self.parameters['logprobs'], echo=self.parameters['echo']
-                                              , stop=self.parameters['stop'],
-                                              presence_penalty=self.parameters['presence_penalty']
-                                              , frequency_penalty=self.parameters['frequency_penalty'],
-                                              best_of=self.parameters['best_of']
-                                              , logit_bias=self.parameters['logit_bias'], user=self.parameters['user'])
+            output = openai.Completion.create(model=self.model_name, prompt=prompt,
+                                              #suffix=self.parameters['suffix'],
+                                              max_tokens=self.parameters['max_tokens'],
+                                              temperature=self.parameters['temperature'],
+                                              #top_p=self.parameters['top_p'],
+                                              #n=self.parameters['n'], stream=self.parameters['stream'],
+                                              #logprobs=self.parameters['logprobs'], echo=self.parameters['echo'],
+                                              stop=self.parameters['stop'],
+                                              #presence_penalty=self.parameters['presence_penalty'],
+                                              #frequency_penalty=self.parameters['frequency_penalty'],
+                                              #best_of=self.parameters['best_of'],
+                                              #logit_bias=self.parameters['logit_bias'], user=self.parameters['user']
+                                              )
 
             translations.append(output.choices[0]['text'])
 

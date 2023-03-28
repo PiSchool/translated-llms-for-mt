@@ -90,10 +90,8 @@ class Evaluator:
         df_evaluation = self.calculate_sentence_bleu(df_evaluation)
         df_evaluation = self.calculate_sentence_chrf(df_evaluation)
         df_evaluation = self.calculate_COMET(df_evaluation
-                                             , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+                                            , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
 
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
 
         df_evaluation.to_csv(save_path, sep=',')
         return df_evaluation

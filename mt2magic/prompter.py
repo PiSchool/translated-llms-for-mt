@@ -112,8 +112,8 @@ class Prompter:
         trg_examples = [self.pool["target"][idx] for idx in idxs]
         prompt_sentences = [f"[source]: {src_examples[idx]} [target]: {trg_examples[idx]}"
                             for idx in range(self.n_shot)]
-        output = ""
-        src_formatting = f"[source]: {src_sent} [target]: "
+        output = "Translate the final sentence. Use these translations as an example:\n"
+        src_formatting = f"[source]: {src_sent} [target]:"
         for sent in prompt_sentences:
             output += sent
         return output + src_formatting
