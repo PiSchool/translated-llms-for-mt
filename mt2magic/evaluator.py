@@ -19,7 +19,7 @@ class Evaluator:
     def __init__(self, model_name='Unbabel/wmt22-comet-da'):
 
         self.COMET_model_path = download_model(model_name, saving_directory='./models/')
-        self.COMET_sytem_score = 0
+        self.COMET_sytem_score = None
 
     def calculate_sentence_bleu(self, dataframe):
         """
@@ -184,7 +184,7 @@ class Evaluator:
         return mean_bleu
 
     def get_system_score_COMET(self):
-        if self.COMET_sytem_score == 0:
+        if self.COMET_sytem_score == None:
             return 'COMET system score has not been computed yet. Call calculate_system_score_COMET() to compute it directly.'
         else:
             return self.COMET_sytem_score
