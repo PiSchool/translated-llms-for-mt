@@ -1,4 +1,4 @@
-# Name of the challenge
+# Adaptive Machine Translation
 Short description of the challenge.
 
 ## Directory structure
@@ -38,7 +38,7 @@ Simple installation from PyPI
 ```
 pip install -r requirements.txt 
 ```
-After installing the necessary libraries, make sure that tensorRT has been installed successfully by running this command:
+After installing the necessary libraries, make sure that ```tensorRT``` has been installed successfully by running this command:
 ```
 sudo find / -name libnvinfer*.so* -print
 ```
