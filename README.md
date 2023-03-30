@@ -38,7 +38,7 @@ Simple installation from PyPI
 ```
 pip install -r requirements.txt 
 ```
-Afer intalling the neccessary libraries, make sure that ```tensorRT ``` has been installed succesfully with runing this command:
+After installing the necessary libraries, make sure that tensorRT has been installed successfully by running this command:
 ```
 sudo find / -name libnvinfer*.so* -print
 ```
