@@ -38,6 +38,18 @@ Simple installation from PyPI
 ```
 pip install -r requirements.txt 
 ```
+Afer intalling the neccessary libraries, make sure that ```tensorRT ``` has been installed succesfully with runing this command:
+```
+sudo find / -name libnvinfer*.so* -print
+```
+You should probaby see such an output:
+```
+Installing collected packages: nvidia-cuda-runtime-cu12, nvidia-cublas-cu12, nvidia-cudnn-cu12, tensorRT
+Successfully installed nvidia-cublas-cu12-12.1.0.26 nvidia-cuda-runtime-cu12-12.1.55 nvidia-cudnn-cu12-8.8.1.3 tensorRT-8.6.0
+/usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer_plugin.so.8
+/usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer_builder_resource.so.8.6.0
+/usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer.so.8
+```
 
 ## Additional data
 Instructions on how to download additional data (datasets, pre-trained models, ...) needed for running the code, specifically any kind of data that cannot be stored in this repo due to its large size.
