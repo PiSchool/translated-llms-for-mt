@@ -1,4 +1,4 @@
-from Evaluator import Evaluator
+from mt2magic.evaluator import Evaluator
 from mt2magic.dataset_utils import get_df_from_txt
 
 import argparse
