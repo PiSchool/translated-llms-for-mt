@@ -34,7 +34,7 @@ class Evaluator:
             (1./3., 1./3., 1./3.),
             (1./4., 1./4., 1./4., 1./4.)
             ]        
-        for i, r in dataframe.iterrows():   
+        for i, r in dataframe.iterrows():
             bleu_scores = sentence_bleu([word_tokenize(str(r['target']))], word_tokenize(str(r['translation']))
                                        , weights, smoothing_function=smoothie)
             
@@ -184,8 +184,11 @@ class Evaluator:
         return mean_bleu
 
     def get_system_score_COMET(self):
-        if self.COMET_sytem_score == None:
-            return 'COMET system score has not been computed yet. Call calculate_system_score_COMET() to compute it directly.'
+        if self.COMET_sytem_score is None:
+            raise ValueError('COMET system score has not been computed yet!\nEvaluate dataframe first using '
+                             'evaluating_from_file_path() or '
+                             'evaluating_from_dataframe() or\ncall calculate_system_score_COMET() to '
+                             'compute it directly.')
         else:
             return self.COMET_sytem_score
 
