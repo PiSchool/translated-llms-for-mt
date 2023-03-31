@@ -1,24 +1,31 @@
-from mt2magic.flores_dataset import FloresDataset
+from mt2magic.FloresDataModule import FloresDataModule
+from mt2magic.TranslatedDataModule import TranslatedDataModule
+from mt2magic.PEFT_fine_tuner import PEFTModel
 
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, T5Tokenizer, get_linear_schedule_with_warmup
+import argparse
+from pytorch_lightning import seed_everything, Trainer
+from pytorch_lightning.callbacks.early_stopping import EarlyStopping
+from pytorch_lightning.loggers import WandbLogger
+from transformers import AutoTokenizer, T5Tokenizer
 import torch
-from torch.utils.data import DataLoader
-from peft import get_peft_model, LoraConfig, TaskType
-from tqdm import tqdm
 
-src_path = 'data/external/flores200_dataset/dev/ita_Latn.dev'
-trg_path = 'data/external/flores200_dataset/dev/spa_Latn.dev'
-src_eval_path = 'data/external/flores200_dataset/devtest/ita_Latn.devtest'
-trg_eval_path = 'data/external/flores200_dataset/devtest/spa_Latn.devtest'
+parser = argparse.ArgumentParser()
+parser.add_argument('--model')
+parser.add_argument('--dataset')
+args = parser.parse_args()
+
+src_lang ="ita"
+trg_lang = "spa"
 model_path = "models/"
-prefix = "Translate from Italian to Spanish: "
+prefix = "Translate from Italian to Spanish:"
 
-m = "t5"
-
-max_length = 256
-lr = 1e-3
+max_length = 64
+lr = 1e-4
 num_epochs = 1
-batch_size = 1
+batch_size = 4
+lora_alpha = 32
+lora_dropout = 0.1
+lora_r = 16
 
 AVAIL_GPUS = 0
 if torch.cuda.is_available():       
@@ -26,78 +33,75 @@ if torch.cuda.is_available():
     AVAIL_GPUS = torch.cuda.device_count()
     print(f'There are {AVAIL_GPUS} GPU(s) available.')
     print('Device name:', torch.cuda.get_device_name(0))
+    accelerator = "gpu"
                                                                                                                                                                                                                                             
 else:
     print('No GPU available, using the CPU instead.')
     device = torch.device("cpu")   
+    accelerator = "cpu"
 
-if m == "t5":
-  #model_name = "google/flan-t5-small"
-  model_name = "google/mt5-small"
+#f008a102b1eb1e581a8595aa2a0b66d20526ab1e
+if args.model == "t5":
+  model_name = "google/flan-t5-small"
+  #model_name = "google/mt5-small"
   #model_name = "google/flan-ul2"
   tokenizer = T5Tokenizer.from_pretrained(model_name)
-elif m == "bloom":
+elif args.model == "bloom":
   model_name = "bigscience/mt0-small"
   tokenizer = AutoTokenizer.from_pretrained(model_name)
+else:
+   print("Input for model not accepted, possible inputs are: 't5' or 'bloom'")
 
-train_dataset = FloresDataset(src_path, trg_path, tokenizer, prefix)
-eval_dataset = FloresDataset(src_eval_path, trg_eval_path, tokenizer, prefix)
+seed_everything(42)
+if args.dataset == "flores":
+    wandb_logger = WandbLogger(name=f"{args.model}_peft_Flores_{src_lang}_{trg_lang}", 
+                               project='translated-challenge', 
+                               entity='mt2magic', 
+                               log_model=True, 
+                               checkpoint_name="ciao"
+                               )
+    data_path = "data/external/flores200_dataset/"
+    dm = FloresDataModule(src_lang,  
+                        trg_lang,
+                        data_path,
+                        tokenizer=model_name, 
+                        batch_size=batch_size,
+                        max_length=max_length, 
+                        prefix=prefix
+                        )
+elif args.dataset == "translated":
+    wandb_logger = WandbLogger(name=f"{args.model}_peft_Translated_{src_lang}_{trg_lang}", project='translated-challenge', entity='mt2magic', log_model=True)
+    train_path = "data/processed/translated-it-es-train.csv"
+    val_path = "data/processed/translated-it-es-dev.csv"
+    test_path = "data/processed/translated-it-es-test.csv"
+    dm = TranslatedDataModule(train_path, 
+                            val_path, 
+                            test_path,
+                            tokenizer=model_name, 
+                            batch_size=batch_size,
+                            max_length=max_length, 
+                            prefix=prefix
+                            )
+else:
+   print("Input for dataset not accepted, possible inputs are: 'flores' or 'translated'")
 
-train_dataloader = DataLoader(train_dataset, batch_size=batch_size)
-eval_dataloader = DataLoader(eval_dataset, batch_size=batch_size)
+dm.setup()
 
-peft_config = LoraConfig(task_type=TaskType.SEQ_2_SEQ_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-peft_model = get_peft_model(model, peft_config)
+model = PEFTModel(model_name, lora_r, lora_alpha, lora_dropout, device=device, lr=lr)
 
-optimizer = torch.optim.AdamW(peft_model.parameters(), lr=lr)
-lr_scheduler = get_linear_schedule_with_warmup(
-    optimizer=optimizer,
-    num_warmup_steps=0,
-    num_training_steps=(len(train_dataloader) * num_epochs),
-)
-#config.optimizer = "AdamW"
+# if more than one device add devices = AVAIL_GPUS and accumulate_grad_batches
+# for reproducibility add deterministic = True
+trainer = Trainer(
+    max_epochs=num_epochs,
+    accelerator = accelerator, 
+    accumulate_grad_batches=2,
+    logger= wandb_logger,
+    #default_root_dir="models/",
+    callbacks = [EarlyStopping(monitor="val_loss", mode="min", patience=2)]
+    )
 
-# training and evaluation
-peft_model = peft_model.to(device)
-#wandb.watch(peft_model, log="all")
-print("Starting training...")
-for epoch in range(num_epochs):
-    peft_model.train()
-    total_loss = 0
-    for step, batch in enumerate(tqdm(train_dataloader)):
-        batch = {k: v.to(device) for k, v in batch.items()}
-        outputs = peft_model(**batch)
-        loss = outputs.loss
-        total_loss += loss.detach().float()
-        loss.backward()
-        optimizer.step()
-        lr_scheduler.step()
-        optimizer.zero_grad()
+trainer.fit(model, datamodule=dm)
 
-    peft_model.eval()
-    eval_loss = 0
-    eval_preds = []
-    for step, batch in enumerate(tqdm(eval_dataloader)):
-        batch = {k: v.to(device) for k, v in batch.items()}
-        with torch.no_grad():
-            outputs = peft_model(**batch)
-        loss = outputs.loss
-        eval_loss += loss.detach().float()
-        eval_preds.extend(
-            tokenizer.batch_decode(torch.argmax(outputs.logits, -1).detach().cpu().numpy(), skip_special_tokens=True)
-        )
+trainer.save_checkpoint(f"models/{model_name}_peft_{args.dataset}_{src_lang}_{trg_lang}.ckpt")
 
-    eval_epoch_loss = eval_loss / len(eval_dataloader)
-    eval_ppl = torch.exp(eval_epoch_loss)
-    train_epoch_loss = total_loss / len(train_dataloader)
-    train_ppl = torch.exp(train_epoch_loss)
-    print(f"{epoch=}: {train_ppl=} {train_epoch_loss=} {eval_ppl=} {eval_epoch_loss=}")
-    #wandb.log({'epoch': epoch + 1, 'train_loss': train_epoch_loss, 'eval_loss':eval_epoch_loss})
-print("Done!")
-
-# saving model
-model_id = f"{model_path}{peft_config.peft_type}_{m}"
-print("Saving model in {}".format(model_id))
-peft_model.save_pretrained(model_id)
-
+print("Done with the fine-tuning!")

@@ -75,7 +75,7 @@ class Evaluator:
 
         return df_evaluation
 
-    def evaluating_from_dataframe(self, dataframe, save_path='/data/df_result_with_evaluation.csv'
+    def evaluating_from_dataframe(self, dataframe, save_path='data/results/df_result_with_evaluation.csv'
                                   , COMET_model_batch_size=8, COMET_model_gpu_numbers=1):
         """
                     Evaluating translations from privided csv file path.
@@ -92,13 +92,11 @@ class Evaluator:
         df_evaluation = self.calculate_COMET(df_evaluation
                                              , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
 
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
 
         df_evaluation.to_csv(save_path, sep=',')
         return df_evaluation
 
-    def evaluating_from_file_path(self, prediction_file_path, sep=',', encoding='utf-8', save_path='/data/'
+    def evaluating_from_file_path(self, prediction_file_path, sep=',', encoding='utf-8', save_path='data/results/'
                                   , COMET_model_batch_size=8, COMET_model_gpu_numbers=1):
         """
                     Evaluating translations from privided csv file path.
