@@ -1,17 +1,14 @@
 import logging
-
-logging.disable(logging.CRITICAL)
 import pandas as pd
 import torch
 import nltk
-
-nltk.download('punkt')
 from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
 from nltk.translate.chrf_score import sentence_chrf, corpus_chrf
 from comet import download_model, load_from_checkpoint
-
 from nltk.tokenize import word_tokenize
-import os
+
+nltk.download('punkt')
+logging.disable(logging.CRITICAL)
 
 
 class Evaluator:
@@ -30,14 +27,14 @@ class Evaluator:
         dataframe['BLEU4'] = 0
         smoothie = SmoothingFunction().method4
         weights = [
-            (1./2., 1./2.),
-            (1./3., 1./3., 1./3.),
-            (1./4., 1./4., 1./4., 1./4.)
-            ]        
+            (1. / 2., 1. / 2.),
+            (1. / 3., 1. / 3., 1. / 3.),
+            (1. / 4., 1. / 4., 1. / 4., 1. / 4.)
+        ]
         for i, r in dataframe.iterrows():
             bleu_scores = sentence_bleu([word_tokenize(str(r['target']))], word_tokenize(str(r['translation']))
-                                       , weights, smoothing_function=smoothie)
-            
+                                        , weights, smoothing_function=smoothie)
+
             dataframe.at[i, 'BLEU2'] = bleu_scores[0]
             dataframe.at[i, 'BLEU3'] = bleu_scores[1]
             dataframe.at[i, 'BLEU4'] = bleu_scores[2]
@@ -76,9 +73,9 @@ class Evaluator:
                 'src': str(r['source']),
                 'mt': str(r['translation']),
                 'ref': str(r['target'])
-                }
+            }
             data_list.append(data)
-        
+
         model_output = model.predict(data_list, batch_size, gpu_numbers)
         dataframe['COMET'] = model_output.scores
 
@@ -102,7 +99,7 @@ class Evaluator:
         dataframe = self.calculate_sentence_bleu(dataframe)
         dataframe = self.calculate_sentence_chrf(dataframe)
         dataframe = self.calculate_COMET(dataframe
-                                            , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+                                         , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
 
         dataframe.to_csv(save_path, sep=',')
         return dataframe
@@ -125,7 +122,7 @@ class Evaluator:
         dataframe = self.calculate_sentence_bleu(dataframe)
         dataframe = self.calculate_sentence_chrf(dataframe)
         dataframe = self.calculate_COMET(dataframe
-                                             , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+                                         , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
 
         dataframe.to_csv(save_path, sep=',')
         return dataframe
@@ -147,10 +144,10 @@ class Evaluator:
             hypotheses.append(word_tokenize(str(sentence)))
 
         weights = [
-            (1./2., 1./2.),
-            (1./3., 1./3., 1./3.),
-            (1./4., 1./4., 1./4., 1./4.)
-            ]
+            (1. / 2., 1. / 2.),
+            (1. / 3., 1. / 3., 1. / 3.),
+            (1. / 4., 1. / 4., 1. / 4., 1. / 4.)
+        ]
         smoothie = SmoothingFunction().method4
         bleu_corpus_scores = corpus_bleu(list_of_references, hypotheses, weights, smoothing_function=smoothie)
         return {'BLEU2': bleu_corpus_scores[0], 'BLEU3': bleu_corpus_scores[1], 'BLEU4': bleu_corpus_scores[2]}
