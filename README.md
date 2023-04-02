@@ -1,4 +1,4 @@
-# Name of the challenge
+# Adaptive Machine Translation
 Short description of the challenge.
 
 ## Directory structure
@@ -37,6 +37,18 @@ Update appropriately before handing over this repository. You may want to add ot
 Simple installation from PyPI
 ```
 pip install -r requirements.txt 
+```
+After installing the necessary libraries, make sure that ```tensorRT``` has been installed successfully by running this command:
+```
+sudo find / -name libnvinfer*.so* -print
+```
+You should probably see such an output:
+```
+Installing collected packages: nvidia-cuda-runtime-cu12, nvidia-cublas-cu12, nvidia-cudnn-cu12, tensorRT
+Successfully installed nvidia-cublas-cu12-12.1.0.26 nvidia-cuda-runtime-cu12-12.1.55 nvidia-cudnn-cu12-8.8.1.3 tensorRT-8.6.0
+/usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer_plugin.so.8
+/usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer_builder_resource.so.8.6.0
+/usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer.so.8
 ```
 
 ## Additional data

@@ -38,20 +38,23 @@ class modernMT_translator(object):
                                   to the given list of memories.
 
         Returns
-            :obj: `str` or `List`: Returns a str if a single sentence is passed
-                                   and return a list of translations if a list of sentences is passed.
+            :obj: `List`: Returns a list of translations.
 
         """
-
-        translation = self.mmt.translate(self.source_lang, self.target_lang, q
+        # ModernMT model just accept a maximum of 128 sentences at each API call
+        batch_size = 128
+        data_batches = [q[i:i + batch_size] for i in range(0, len(q), batch_size)]
+        translation_list = []
+        for batch in data_batches:
+            translation = self.mmt.translate(self.source_lang, self.target_lang, batch
                                          , context_vector=context_vector, hints=hints, options=self.parameters)
-        if type(translation) is list:
-            translation_list = []
-            for trans in translation:
-                translation_list.append(trans.translation)
-            return translation_list
-        else:
-            return translation.translation
+            if type(translation) is list:
+                for trans in translation:
+                    translation_list.append(trans.translation)
+            else:
+                translation_list.append(translation.translation)
+
+        return translation_list
 
     def translate(self, data: pd.DataFrame, context_vector=None, hints=None) -> pd.DataFrame:
         """
