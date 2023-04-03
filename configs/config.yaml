@@ -1,0 +1,9 @@
+defaults:
+  - datasets: ???
+  - experiments: ???
+  - _self_
+hydra:
+  sweeper:
+    params:
+      datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
+      experiments: gpt_fuzzy_3ex,gpt_random_3ex,gpt_label_3ex
