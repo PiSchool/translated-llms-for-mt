@@ -80,12 +80,16 @@ class PromptConfig(TypedDict):
         n_shots (:obj:`int`): number of examples to include in the prompt
         strategy (:obj:`str`): strategy to use to perform sampling of the examples
                                (can be either "random", "fuzzy" or "labeled")
-        pool (:obj:`pd.DataFrame`): data formatted as in mt2magic.formatting.PrompterData
-        embeddings_path (:obj:`str`): path to the tensor file with the source pool embeddings
+        pool_path (:obj:`str`): path to a csv formatted as in mt2magic.formatting.PrompterData
+        embeddings_path (:obj:`str`): path to the tensor file (.pt) with the source pool embeddings
+        encoding (:obj:`str`): encoding of the pool csv file to be read from pool_path
+        sep (:obj:`str`): delimiter used in the pool csv file to be read from pool_path
     """
     n_shots: int
     strategy: str
-    pool: pd.DataFrame
+    pool_path: str
     embeddings_path: str
+    encoding:str
+    sep: str
 
 

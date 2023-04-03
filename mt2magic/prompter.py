@@ -1,5 +1,6 @@
 from sentence_transformers import util, SentenceTransformer
 from mt2magic.formatting import PromptConfig
+import pandas as pd
 from typing import List
 from random import sample
 from typing import Optional
@@ -15,7 +16,7 @@ class Prompter:
         self.n_shot = config["n_shots"]
         self.strategy = config["strategy"]
         self.src_embeddings = torch.load(config['embeddings_path'])
-        self.pool = config["pool"]
+        self.pool = pd.read_csv(config["pool_path"], sep=config["sep"], encoding=config["encoding"])
         self.embedder = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
 
 
@@ -23,7 +24,7 @@ class Prompter:
         self.n_shot = config["n_shots"]
         self.strategy = config["strategy"]
         self.src_embeddings = torch.load(config['embeddings_path'])
-        self.pool = config["pool"]
+        self.pool = pd.read_csv(config["pool_path"], sep=config["sep"], encoding=config["encoding"])
 
     def get_random_prompt(self, src_sent: str) -> str:
         """
@@ -59,7 +60,7 @@ class Prompter:
         """
         if self.strategy == "fuzzy":
             return self.get_fuzzy_prompt(src_sent)
-        elif self.strategy == "labeled" and label is not None:
+        elif self.strategy == "label" and label is not None:
             return self.get_labeled_prompt(src_sent, label)
         else:
             return self.get_random_prompt(src_sent)
