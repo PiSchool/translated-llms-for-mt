@@ -102,14 +102,12 @@ class Evaluator:
         """
         dataframe = self.calculate_sentence_bleu(dataframe)
         dataframe = self.calculate_sentence_chrf(dataframe)
-
         if torch.cuda.is_available():
-            dataframe = self.calculate_COMET(dataframe
-                                             , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+            dataframe = self.calculate_COMET(dataframe, batch_size=COMET_model_batch_size,
+                                             gpu_numbers=COMET_model_gpu_numbers)
         else:
             if self.run_without_gpu:
-                dataframe = self.calculate_COMET(dataframe
-                                                 , batch_size=COMET_model_batch_size,
+                dataframe = self.calculate_COMET(dataframe, batch_size=COMET_model_batch_size,
                                                  gpu_numbers=COMET_model_gpu_numbers)
             else:
                 print('Skipping COMET score calculation due to the absence of GPU ...'
@@ -136,12 +134,11 @@ class Evaluator:
         dataframe = self.calculate_sentence_bleu(dataframe)
         dataframe = self.calculate_sentence_chrf(dataframe)
         if torch.cuda.is_available():
-            dataframe = self.calculate_COMET(dataframe
-                                             , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+            dataframe = self.calculate_COMET(dataframe, batch_size=COMET_model_batch_size,
+                                             gpu_numbers=COMET_model_gpu_numbers)
         else:
             if self.run_without_gpu:
-                dataframe = self.calculate_COMET(dataframe
-                                                 , batch_size=COMET_model_batch_size,
+                dataframe = self.calculate_COMET(dataframe, batch_size=COMET_model_batch_size,
                                                  gpu_numbers=COMET_model_gpu_numbers)
             else:
                 print('Skipping COMET score calculation due to the absence of GPU ...'
@@ -155,7 +152,7 @@ class Evaluator:
         corpus_chrf = self.calculate_corpus_chrf(dataframe)
         try:
             corpus_COMET = self.get_system_score_COMET()
-        except:
+        except ValueError:
             if torch.cuda.is_available():
                 corpus_COMET = self.calculate_system_score_COMET(dataframe)
             else:
