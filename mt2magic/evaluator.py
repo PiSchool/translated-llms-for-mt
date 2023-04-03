@@ -13,12 +13,13 @@ logging.disable(logging.CRITICAL)
 
 class Evaluator:
 
-    def __init__(self, model_name='Unbabel/wmt22-comet-da'):
+    def __init__(self, model_name='Unbabel/wmt22-comet-da', run_without_gpu=False):
 
         self.COMET_model_path = download_model(model_name, saving_directory='./models/')
         self.COMET_sytem_score = None
+        self.run_without_gpu = run_without_gpu
 
-    def calculate_sentence_bleu(self, dataframe):
+    def calculate_sentence_bleu(self, dataframe: pd.DataFrame):
         """
         Calculating the sentence BLEU score for each translation.
         """
@@ -41,7 +42,7 @@ class Evaluator:
 
         return dataframe
 
-    def calculate_sentence_chrf(self, dataframe):
+    def calculate_sentence_chrf(self, dataframe: pd.DataFrame):
         """
         Calculating the sentence chrf score for each translation.
         """
@@ -52,7 +53,7 @@ class Evaluator:
 
         return dataframe
 
-    def calculate_COMET(self, dataframe, batch_size=16, gpu_numbers=1):
+    def calculate_COMET(self, dataframe: pd.DataFrame, batch_size=16, gpu_numbers=1):
         """
         Calculating the COMET score for each translation and also COMET sytem_score for entire translations.
         Args
@@ -79,13 +80,16 @@ class Evaluator:
         model_output = model.predict(data_list, batch_size, gpu_numbers)
         dataframe['COMET'] = model_output.scores
 
+        # You can comment this line if you don't have memory problems
+        del model
+
         # Add COMET system_score to self.COMET_sytem_score variable 
         # so when we need COMET system_score, there won't be any need to recalculate it
         self.COMET_sytem_score = model_output.system_score
 
         return dataframe
 
-    def evaluating_from_dataframe(self, dataframe, save_path='/data/df_result_with_evaluation.csv'
+    def evaluating_from_dataframe(self, dataframe: pd.DataFrame, save_path='/data/df_result_with_evaluation.csv'
                                   , COMET_model_batch_size=8, COMET_model_gpu_numbers=1):
         """
         Evaluating translations from privided csv file path.
@@ -98,13 +102,21 @@ class Evaluator:
         """
         dataframe = self.calculate_sentence_bleu(dataframe)
         dataframe = self.calculate_sentence_chrf(dataframe)
-        dataframe = self.calculate_COMET(dataframe
-                                         , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+        if torch.cuda.is_available():
+            dataframe = self.calculate_COMET(dataframe, batch_size=COMET_model_batch_size,
+                                             gpu_numbers=COMET_model_gpu_numbers)
+        else:
+            if self.run_without_gpu:
+                dataframe = self.calculate_COMET(dataframe, batch_size=COMET_model_batch_size,
+                                                 gpu_numbers=COMET_model_gpu_numbers)
+            else:
+                print('Skipping COMET score calculation due to the absence of GPU ...'
+                      '\nIf you want to calculate it with CPU then set run_without_gpu=True')
 
         dataframe.to_csv(save_path, sep=',')
         return dataframe
 
-    def evaluating_from_file_path(self, prediction_file_path, sep=',', encoding='utf-8', save_path='/data/'
+    def evaluating_from_file_path(self, prediction_file_path: str, sep=',', encoding='utf-8', save_path='/data/'
                                   , COMET_model_batch_size=8, COMET_model_gpu_numbers=1):
         """
         Evaluating translations from privided csv file path.
@@ -121,13 +133,43 @@ class Evaluator:
         dataframe = pd.read_csv(prediction_file_path, sep=sep, encoding=encoding)
         dataframe = self.calculate_sentence_bleu(dataframe)
         dataframe = self.calculate_sentence_chrf(dataframe)
-        dataframe = self.calculate_COMET(dataframe
-                                         , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+        if torch.cuda.is_available():
+            dataframe = self.calculate_COMET(dataframe, batch_size=COMET_model_batch_size,
+                                             gpu_numbers=COMET_model_gpu_numbers)
+        else:
+            if self.run_without_gpu:
+                dataframe = self.calculate_COMET(dataframe, batch_size=COMET_model_batch_size,
+                                                 gpu_numbers=COMET_model_gpu_numbers)
+            else:
+                print('Skipping COMET score calculation due to the absence of GPU ...'
+                      '\nIf you want to calculate it with CPU then set run_without_gpu=True')
 
         dataframe.to_csv(save_path, sep=',')
         return dataframe
 
-    def calculate_corpus_bleu(self, dataframe):
+    def calculating_corpus_metrics_from_dataframe(self, dataframe: pd.DataFrame):
+        corpus_BLEUs = self.calculate_corpus_bleu(dataframe)
+        corpus_chrf = self.calculate_corpus_chrf(dataframe)
+        try:
+            corpus_COMET = self.get_system_score_COMET()
+        except ValueError:
+            if torch.cuda.is_available():
+                corpus_COMET = self.calculate_system_score_COMET(dataframe)
+            else:
+                if self.run_without_gpu:
+                    corpus_COMET = self.calculate_system_score_COMET(dataframe)
+                else:
+                    corpus_COMET = None
+                    print('Skipping COMET score calculation due to the absence of GPU ...'
+                          '\nIf you want to calculate it with CPU then set run_without_gpu=True')
+
+        data = {'BLEU2': corpus_BLEUs[0], 'BLEU3': corpus_BLEUs[1], 'BLEU4': corpus_BLEUs[2]
+            , 'corpus_chrf': corpus_chrf, 'corpus_COMET': corpus_COMET}
+        df_result = pd.DataFrame([data])
+
+        return df_result
+
+    def calculate_corpus_bleu(self, dataframe: pd.DataFrame):
         """
         Calculating the corpus BLEU score over entire translations.
         Args
@@ -150,16 +192,16 @@ class Evaluator:
         ]
         smoothie = SmoothingFunction().method4
         bleu_corpus_scores = corpus_bleu(list_of_references, hypotheses, weights, smoothing_function=smoothie)
-        return {'BLEU2': bleu_corpus_scores[0], 'BLEU3': bleu_corpus_scores[1], 'BLEU4': bleu_corpus_scores[2]}
+        return bleu_corpus_scores
 
-    def calculate_mean_bleu(self, dataframe):
+    def calculate_mean_bleu(self, dataframe: pd.DataFrame):
         """
             Calculating the mean BLEU score over entire translations.
         """
         mean_bleu = dataframe.loc[:, 'BLEU'].mean()
         return mean_bleu
 
-    def calculate_corpus_chrf(self, dataframe):
+    def calculate_corpus_chrf(self, dataframe: pd.DataFrame):
         """
         Calculating the corpus chrf score over entire translations.
         """
@@ -173,7 +215,7 @@ class Evaluator:
 
         return corpus_chrf(list_of_references, hypotheses)
 
-    def calculate_mean_chrf(self, dataframe):
+    def calculate_mean_chrf(self, dataframe: pd.DataFrame):
         """
         Calculating the mean chrf score over entire translations.
         """
@@ -189,7 +231,7 @@ class Evaluator:
         else:
             return self.COMET_sytem_score
 
-    def calculate_system_score_COMET(self, dataframe, batch_size=16, gpu_numbers=1):
+    def calculate_system_score_COMET(self, dataframe: pd.DataFrame, batch_size=16, gpu_numbers=1):
         """
         Calculate system_score (mean) COMET score over entire translations.
         Args
@@ -222,4 +264,11 @@ class Evaluator:
             data_list.append(data)
 
         model_output = model.predict(data_list, batch_size=batch_size, gpus=gpu_numbers)
+
+        # You can comment this line if you don't have memory problems
+        del model
+
         return model_output.system_score
+
+    def set_run_without_gpu(self, run_without_gpu):
+        self.run_without_gpu = run_without_gpu
