@@ -6,14 +6,18 @@ import hydra
 
 @hydra.main(version_base=None, config_path="../configs", config_name="config")
 def translate_pipeline(cfg: DictConfig) -> None:
-    test_df = pd.read_csv(cfg.datasets.test)
+    test_df = pd.read_csv(cfg.datasets.test, sep=cfg.datasets.sep, encoding=cfg.datasets.encoding)
+    print(cfg.datasets.sep)
+    print(test_df["source"].head())
     if cfg.experiments.model == "gpt":
         stop_seq = ['[target]', '[source]']
         gpt_param = {'temperature': 0.0, 'max_tokens': 256,'stop': stop_seq}
         prompt_config = {'n_shots': cfg.experiments.n_shots,
                          'strategy': cfg.experiments.strategy,
-                         'pool': cfg.datasets.dev,
-                         'embeddings_path': cfg.datasets.emb_src}
+                         'pool_path': cfg.datasets.dev,
+                         'embeddings_path': cfg.datasets.emb_src,
+                         'sep': cfg.datasets.sep,
+                         'encoding': cfg.datasets.encoding}
         gpt_translator = gpt3_translator(API_KEY=cfg.experiments.key,
                                          prompt_config=prompt_config,
                                          model_name='davinci',

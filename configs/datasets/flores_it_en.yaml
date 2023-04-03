@@ -4,3 +4,5 @@ emb_src: data/processed/flores/flores-dev-embedding_it.pt
 dev: data/processed/flores/flores-it-en-dev.csv
 src_lan: it
 trg_lan: en
+sep: ','
+encoding: utf-8
