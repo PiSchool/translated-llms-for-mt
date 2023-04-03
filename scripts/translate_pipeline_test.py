@@ -25,7 +25,7 @@ API_URL_T5 = "https://api-inference.huggingface.co/models/t5-base"
 src_test_path = f'data/external/flores200_dataset/devtest/{mapping_to_flores[args.src]}.devtest'
 trg_test_path = f'data/external/flores200_dataset/devtest/{mapping_to_flores[args.trg]}.devtest'
 embeddings_path = f'data/processed/flores-prompt-embedding_{args.src}.pt'
-prompt_df = pd.read_csv(f'data/processed/flores-{args.src}-{args.trg}-prompt.csv')
+prompt_df = pd.read_csv(f'data/processed/translated/flores-{args.src}-{args.trg}-prompt.csv')
 
 evaluator = Evaluator()
 #save_path = f'./data/processed/metrics/{args.model}-3examples-random-{args.src}-{args.trg}-flores.csv'
@@ -35,7 +35,7 @@ aggregate_path = f'./data/processed/metrics/{args.model}-{args.src}-{args.trg}-f
 test_df = get_df_from_txt(src_path=src_test_path, trg_path=trg_test_path).head(128)
 
 if args.model == "gpt":
-    stop_seq = ['\n', '[target]', '[source]']
+    stop_seq = ['[target]', '[source]']
     param = {'temperature': 0.0, 'max_tokens': 256,'stop': stop_seq}
     prompt_config = {'n_shots': 3, 'strategy': 'random',
                      'pool': prompt_df, 'embeddings_path': embeddings_path}

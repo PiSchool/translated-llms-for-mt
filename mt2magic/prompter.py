@@ -1,5 +1,6 @@
 from sentence_transformers import util, SentenceTransformer
 from mt2magic.formatting import PromptConfig
+import pandas as pd
 from typing import List
 from random import sample
 from typing import Optional
@@ -15,7 +16,7 @@ class Prompter:
         self.n_shot = config["n_shots"]
         self.strategy = config["strategy"]
         self.src_embeddings = torch.load(config['embeddings_path'])
-        self.pool = config["pool"]
+        self.pool = pd.read_csv(config["pool"])
         self.embedder = SentenceTransformer("paraphrase-multilingual-mpnet-base-v2")
 
 

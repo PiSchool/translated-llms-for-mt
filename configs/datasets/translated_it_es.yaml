@@ -1,0 +1,6 @@
+dataset: translated
+test: data/processed/translated/translated-it-es-test.csv
+emb_src: data/processed/translated/translated-it-es-dev-embedding_it.pt
+dev: data/processed/translated/translated-it-es-dev.csv
+src_lan: it
+trg_lan: es

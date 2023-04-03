@@ -80,12 +80,12 @@ class PromptConfig(TypedDict):
         n_shots (:obj:`int`): number of examples to include in the prompt
         strategy (:obj:`str`): strategy to use to perform sampling of the examples
                                (can be either "random", "fuzzy" or "labeled")
-        pool (:obj:`pd.DataFrame`): data formatted as in mt2magic.formatting.PrompterData
+        pool (:obj:`pd.DataFrame`): path to a csv formatted as in mt2magic.formatting.PrompterData
         embeddings_path (:obj:`str`): path to the tensor file with the source pool embeddings
     """
     n_shots: int
     strategy: str
-    pool: pd.DataFrame
+    pool: str
     embeddings_path: str
 
 
