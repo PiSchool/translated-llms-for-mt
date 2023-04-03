@@ -13,10 +13,11 @@ logging.disable(logging.CRITICAL)
 
 class Evaluator:
 
-    def __init__(self, model_name='Unbabel/wmt22-comet-da'):
+    def __init__(self, model_name='Unbabel/wmt22-comet-da', run_without_gpu=False):
 
         self.COMET_model_path = download_model(model_name, saving_directory='./models/')
         self.COMET_sytem_score = None
+        self.run_without_gpu = run_without_gpu
 
     def calculate_sentence_bleu(self, dataframe: pd.DataFrame):
         """
@@ -101,8 +102,18 @@ class Evaluator:
         """
         dataframe = self.calculate_sentence_bleu(dataframe)
         dataframe = self.calculate_sentence_chrf(dataframe)
-        dataframe = self.calculate_COMET(dataframe
-                                         , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+
+        if torch.cuda.is_available():
+            dataframe = self.calculate_COMET(dataframe
+                                             , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+        else:
+            if self.run_without_gpu:
+                dataframe = self.calculate_COMET(dataframe
+                                                 , batch_size=COMET_model_batch_size,
+                                                 gpu_numbers=COMET_model_gpu_numbers)
+            else:
+                print('Skipping COMET score calculation due to the absence of GPU ...'
+                      '\nIf you want to calculate it with CPU then set run_without_gpu=True')
 
         dataframe.to_csv(save_path, sep=',')
         return dataframe
@@ -124,8 +135,17 @@ class Evaluator:
         dataframe = pd.read_csv(prediction_file_path, sep=sep, encoding=encoding)
         dataframe = self.calculate_sentence_bleu(dataframe)
         dataframe = self.calculate_sentence_chrf(dataframe)
-        dataframe = self.calculate_COMET(dataframe
-                                         , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+        if torch.cuda.is_available():
+            dataframe = self.calculate_COMET(dataframe
+                                             , batch_size=COMET_model_batch_size, gpu_numbers=COMET_model_gpu_numbers)
+        else:
+            if self.run_without_gpu:
+                dataframe = self.calculate_COMET(dataframe
+                                                 , batch_size=COMET_model_batch_size,
+                                                 gpu_numbers=COMET_model_gpu_numbers)
+            else:
+                print('Skipping COMET score calculation due to the absence of GPU ...'
+                      '\nIf you want to calculate it with CPU then set run_without_gpu=True')
 
         dataframe.to_csv(save_path, sep=',')
         return dataframe
@@ -136,14 +156,21 @@ class Evaluator:
         try:
             corpus_COMET = self.get_system_score_COMET()
         except:
-            corpus_COMET = self.calculate_system_score_COMET(dataframe)
+            if torch.cuda.is_available():
+                corpus_COMET = self.calculate_system_score_COMET(dataframe)
+            else:
+                if self.run_without_gpu:
+                    corpus_COMET = self.calculate_system_score_COMET(dataframe)
+                else:
+                    corpus_COMET = None
+                    print('Skipping COMET score calculation due to the absence of GPU ...'
+                          '\nIf you want to calculate it with CPU then set run_without_gpu=True')
 
         data = {'BLEU2': corpus_BLEUs[0], 'BLEU3': corpus_BLEUs[1], 'BLEU4': corpus_BLEUs[2]
-                , 'corpus_chrf': corpus_chrf, 'corpus_COMET': corpus_COMET}
+            , 'corpus_chrf': corpus_chrf, 'corpus_COMET': corpus_COMET}
         df_result = pd.DataFrame([data])
 
         return df_result
-
 
     def calculate_corpus_bleu(self, dataframe: pd.DataFrame):
         """
@@ -245,3 +272,6 @@ class Evaluator:
         del model
 
         return model_output.system_score
+
+    def set_run_without_gpu(self, run_without_gpu):
+        self.run_without_gpu = run_without_gpu
