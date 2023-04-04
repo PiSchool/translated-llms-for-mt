@@ -42,28 +42,30 @@ class gpt3_translator:
         openai.api_key = self.api_key
         translation_list = []
         prompt_list = []
+        batch_size = 20 # open ai max parallel prompt request is 20!
         for idx in range(0, len(sentences)):
             if labels is not None:
                 prompt = self.prompter.get_prompt(src_sent=sentences[idx], label=labels[idx])
             else:
                 prompt = self.prompter.get_prompt(src_sent=sentences[idx])
             prompt_list.append(prompt)
-
-        output = openai.Completion.create(model=self.model_name, prompt=prompt_list,
-                                          # suffix=self.parameters['suffix'],
-                                          max_tokens=self.parameters['max_tokens'],
-                                          temperature=self.parameters['temperature'],
-                                          # top_p=self.parameters['top_p'],
-                                          # n=self.parameters['n'], stream=self.parameters['stream'],
-                                          # logprobs=self.parameters['logprobs'], echo=self.parameters['echo'],
-                                          stop=self.parameters['stop'],
-                                          # presence_penalty=self.parameters['presence_penalty'],
-                                          # frequency_penalty=self.parameters['frequency_penalty'],
-                                          # best_of=self.parameters['best_of'],
-                                          # logit_bias=self.parameters['logit_bias'], user=self.parameters['user']
-                                          )
-        for trans in output.choices:
-            translation_list.append(trans.text)
+        data_batches = [prompt_list[i:i + batch_size] for i in range(0, len(prompt_list), batch_size)]
+        for batch in data_batches:
+            output = openai.Completion.create(model=self.model_name, prompt=batch,
+                                              # suffix=self.parameters['suffix'],
+                                              max_tokens=self.parameters['max_tokens'],
+                                              temperature=self.parameters['temperature'],
+                                              # top_p=self.parameters['top_p'],
+                                              # n=self.parameters['n'], stream=self.parameters['stream'],
+                                              # logprobs=self.parameters['logprobs'], echo=self.parameters['echo'],
+                                              stop=self.parameters['stop'],
+                                              # presence_penalty=self.parameters['presence_penalty'],
+                                              # frequency_penalty=self.parameters['frequency_penalty'],
+                                              # best_of=self.parameters['best_of'],
+                                              # logit_bias=self.parameters['logit_bias'], user=self.parameters['user']
+                                              )
+            for trans in output.choices:
+                translation_list.append(trans.text)
 
         return translation_list
 
