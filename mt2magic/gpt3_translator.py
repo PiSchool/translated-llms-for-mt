@@ -1,5 +1,5 @@
 import openai
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
@@ -28,7 +28,7 @@ class gpt3_translator:
         openai.api_key = self.api_key
         return openai.Model.retrieve(model_name)
 
-    def translate_sentences(self, sentences: List[str]) -> List[str]:
+    def translate_sentences(self, sentences: List[str], labels: Optional[List[str]] = None) -> List[str]:
         """
         Translate sentences from the source to the target language; source
         and target language are specified by the prompt.
@@ -42,8 +42,11 @@ class gpt3_translator:
         openai.api_key = self.api_key
         translation_list = []
         prompt_list = []
-        for sent in sentences:
-            prompt = self.prompter.get_prompt(src_sent=sent)
+        for idx in range(0, len(sentences)):
+            if labels is not None:
+                prompt = self.prompter.get_prompt(src_sent=sentences[idx], label=labels[idx])
+            else:
+                prompt = self.prompter.get_prompt(src_sent=sentences[idx])
             prompt_list.append(prompt)
 
         output = openai.Completion.create(model=self.model_name, prompt=prompt_list,
@@ -83,7 +86,11 @@ class gpt3_translator:
         """
         self._set_prompter_config(config=prompter_config)
         source_sentences = data["source"].to_list()
-        data["translation"] = self.translate_sentences(source_sentences)
+        if prompter_config["strategy"] == "label" and "label" in data.columns:
+            labels = data["label"].to_list()
+            data["translation"] = self.translate_sentences(source_sentences, labels)
+        else:
+            data["translation"] = self.translate_sentences(source_sentences)
         return data
 
     def _set_prompter_config(self, config: PromptConfig):

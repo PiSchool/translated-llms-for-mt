@@ -2,10 +2,10 @@ from sentence_transformers import util, SentenceTransformer
 from mt2magic.formatting import PromptConfig
 import pandas as pd
 from typing import List
-from random import sample
+import random
 from typing import Optional
 import torch
-
+random.seed(42)
 """
 Prompter for pure generative language models.
 The get_labeled_prompt method is a proxy, since the SVM + fuzzy pipeline
@@ -37,7 +37,7 @@ class Prompter:
             (:obj:`str`): A string with the prompt for performing translation.
         """
         pool_size = len(self.pool)
-        idxs = sample(list(range(pool_size)), self.n_shot)
+        idxs = random.sample(list(range(pool_size)), self.n_shot)
         return self._format_prompt(src_sent, idxs)
 
     def get_prompt(self, src_sent: str, label: Optional[str] = None) -> str:
@@ -111,10 +111,10 @@ class Prompter:
         """
         src_examples = [self.pool["source"][idx] for idx in idxs]
         trg_examples = [self.pool["target"][idx] for idx in idxs]
-        prompt_sentences = [f"[source]: {src_examples[idx]} [target]: {trg_examples[idx]}"
+        prompt_sentences = [f"[source]: {src_examples[idx]}\n[target]: {trg_examples[idx]}\n"
                             for idx in range(self.n_shot)]
         output = "Translate the final sentence. Use these translations as an example:\n"
-        src_formatting = f"[source]: {src_sent} [target]:"
+        src_formatting = f"[source]: {src_sent}\n[target]:"
         for sent in prompt_sentences:
             output += sent
         return output + src_formatting
