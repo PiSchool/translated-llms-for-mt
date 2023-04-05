@@ -20,9 +20,9 @@ model_path = "models/"
 prefix = "Translate from Italian to Spanish:"
 
 max_length = 64
-lr = 1e-4
+lr = 3e-4
 num_epochs = 1
-batch_size = 4
+batch_size = 1
 accumulate_grad_num = 4
 
 lora_alpha = 32
@@ -36,11 +36,13 @@ if torch.cuda.is_available():
     print(f'There are {AVAIL_GPUS} GPU(s) available.')
     print('Device name:', torch.cuda.get_device_name(0))
     accelerator = "gpu"
+    quantization = True
                                                                                                                                                                                                                                             
 else:
     print('No GPU available, using the CPU instead.')
     device = torch.device("cpu")   
     accelerator = "cpu"
+    quantization = False
 
 #f008a102b1eb1e581a8595aa2a0b66d20526ab1e
 if args.model == "t5":
@@ -98,17 +100,17 @@ wandb_logger.experiment.config["lora_dropout"] = lora_dropout
 wandb_logger.experiment.config["lora_r"] = lora_r
 wandb_logger.experiment.config["accumulate_grad_num"] = accumulate_grad_num
 
-model = PEFTModel(model_name, lora_r, lora_alpha, lora_dropout, device=device, lr=lr)
+model = PEFTModel(model_name, lora_r, lora_alpha, lora_dropout, device=device, lr=lr, quantization=quantization)
 
 # if more than one device add devices = AVAIL_GPUS and accumulate_grad_batches
 # for reproducibility add deterministic = True
 trainer = Trainer(
     max_epochs=num_epochs,
     accelerator = accelerator,
-    devices = AVAIL_GPUS, 
+    devices = AVAIL_GPUS if AVAIL_GPUS else 1, # if we are not using GPUs set this to 1 anyway
     accumulate_grad_batches=accumulate_grad_num,
     logger= wandb_logger,
-    #default_root_dir="models/",
+    default_root_dir="models/",
     #callbacks = [EarlyStopping(monitor="val_loss", mode="min", patience=2)]
     )
 

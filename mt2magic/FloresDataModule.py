@@ -99,10 +99,10 @@ class FloresDataModule(LightningDataModule):
     trg_input_ids = []
     for _, row in data.iterrows():
       src_encoding = self.tokenizer.batch_encode_plus(
-            [self.prefix+row["original"]], max_length=self.max_length, pad_to_max_length=True, truncation=True
+            [self.prefix+row["original"]], max_length=self.max_length,  padding="max_length", truncation=True
         )
       trg_encoding = self.tokenizer.batch_encode_plus(
-            [row["translation"]], max_length=self.max_length, pad_to_max_length=True, truncation=True
+            [row["translation"]], max_length=self.max_length,  padding="max_length", truncation=True
         )
       
       input_ids.append(src_encoding.get('input_ids')[0])
