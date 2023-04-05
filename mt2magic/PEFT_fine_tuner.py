@@ -1,7 +1,7 @@
 import torch
 from pytorch_lightning import LightningModule
 from transformers import AutoModelForSeq2SeqLM
-from peft import LoraConfig, TaskType, get_peft_model
+from peft import LoraConfig, TaskType, get_peft_model, prepare_model_for_int8_training
 
 """
 Class to fine-tune models using LoRA
@@ -24,7 +24,8 @@ class PEFTModel(LightningModule):
                                   lora_alpha=lora_alpha, 
                                   lora_dropout=lora_dropout
                                   )
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name, load_in_8bit=True, device_map='auto')
+    model = prepare_model_for_int8_training(model)
     self.peft_model = get_peft_model(model, self.peft_config).to(device)
     self.lr = lr
     self.save_hyperparameters()

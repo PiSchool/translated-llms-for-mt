@@ -23,6 +23,8 @@ max_length = 64
 lr = 1e-4
 num_epochs = 1
 batch_size = 4
+accumulate_grad_num = 4
+
 lora_alpha = 32
 lora_dropout = 0.1
 lora_r = 16
@@ -43,7 +45,7 @@ else:
 #f008a102b1eb1e581a8595aa2a0b66d20526ab1e
 if args.model == "t5":
   model_name = "google/flan-t5-small"
-  #model_name = "google/mt5-small"
+  #model_name = "google/flan-t5-large"
   #model_name = "google/flan-ul2"
   tokenizer = T5Tokenizer.from_pretrained(model_name)
 elif args.model == "bloom":
@@ -87,17 +89,27 @@ else:
 
 dm.setup()
 
+wandb_logger.experiment.config["max_length"] = max_length
+wandb_logger.experiment.config["lr"] = lr
+wandb_logger.experiment.config["num_epochs"] = num_epochs
+wandb_logger.experiment.config["batch_size"] = batch_size
+wandb_logger.experiment.config["lora_alpha"] = lora_alpha
+wandb_logger.experiment.config["lora_dropout"] = lora_dropout
+wandb_logger.experiment.config["lora_r"] = lora_r
+wandb_logger.experiment.config["accumulate_grad_num"] = accumulate_grad_num
+
 model = PEFTModel(model_name, lora_r, lora_alpha, lora_dropout, device=device, lr=lr)
 
 # if more than one device add devices = AVAIL_GPUS and accumulate_grad_batches
 # for reproducibility add deterministic = True
 trainer = Trainer(
     max_epochs=num_epochs,
-    accelerator = accelerator, 
-    accumulate_grad_batches=2,
+    accelerator = accelerator,
+    devices = AVAIL_GPUS, 
+    accumulate_grad_batches=accumulate_grad_num,
     logger= wandb_logger,
     #default_root_dir="models/",
-    callbacks = [EarlyStopping(monitor="val_loss", mode="min", patience=2)]
+    #callbacks = [EarlyStopping(monitor="val_loss", mode="min", patience=2)]
     )
 
 trainer.fit(model, datamodule=dm)
