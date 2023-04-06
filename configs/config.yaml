@@ -5,5 +5,5 @@ defaults:
 hydra:
   sweeper:
     params:
-      datasets: translated_it_es
-      experiments: gpt_fuzzy_3ex
+      datasets: flores_it_en,flores_it_es
+      experiments: gpt_label_3ex

@@ -51,8 +51,30 @@ Successfully installed nvidia-cublas-cu12-12.1.0.26 nvidia-cuda-runtime-cu12-12.
 /usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer.so.8
 ```
 
-## Additional data
-Instructions on how to download additional data (datasets, pre-trained models, ...) needed for running the code, specifically any kind of data that cannot be stored in this repo due to its large size.
+## Additional data  
+First of all, be sure to be placed in the directory ```translated-llms-for-mt```.  
+Download the flores dataset by running:  
+```
+./data/scripts/flores-101.sh
+```
+Then download the Translated datasets, you can find the cleaned versions on [gDrive](https://drive.google.com/drive/u/4/folders/14E5dAKdK7pwitSqf6zh233YybA73MzvJ): download the files ```translated-it-en-cleaned.csv``` and ```translated-it-es-cleaned.csv``` and put them in ```translated-llms-for-mt```.  
+Download all the ```.pt``` files [here](https://drive.google.com/drive/u/4/folders/1qecmn7ySukT6CVZZl2CTPKeN1tq3AHkp) (sBert encodings used for fuzzy prompting) and put them in ```translated-llms-for-mt```.  
+Move all the files in the right directories with:  
+```
+./data/scripts/adjust_files.sh
+```
+Now launch the two scripts for splitting and formatting the datasets with:
+```
+python3 -m data.scripts.flores_preprocess
+```  
+and:  
+```
+python3 -m data.scripts.translated_split
+```  
+You can now work with the scripts for evaluation!
+
+
+
 
 ## How to run
 Instructions on how to run the code. For example, if the developed code is used as a CLI tool:

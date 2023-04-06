@@ -1,5 +1,5 @@
 # run this script from the path_to/translated-llms-for-mt directory
-# as $source data/scripts/flores-101.sh
+# as $./data/scripts/flores-101.sh
 # here's a link with additional resources: https://github.com/facebookresearch/flores
 EXTERNAL_PATH=./data/external
 wget -P $EXTERNAL_PATH --trust-server-names https://tinyurl.com/flores200dataset
