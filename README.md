@@ -77,17 +77,45 @@ You can now work with the scripts for evaluation!
 
 
 ## How to run
-Instructions on how to run the code. For example, if the developed code is used as a CLI tool:
+Experiments with gpt3 and ModernMT (read Additional data paragraph first!)  
+You can test ModernMT on four datasets: flores from italian to english (flores_it_en), flores from italian to spanish (flores_it_es), translated from italian to english (translated_it_en), translated from italian to spanish (translated_it_es).  
+The inference pipeline exploits Hydra, so adding more experiments is as easy as writing a simple YAML file.  
+To run ModernMT evaluation on these datasets, modify the sweeper inputs of ```./configs/config``` like this:
 ```
-your_script.py --arg1 val1 --arg2 val2
+defaults:
+  - datasets: ???
+  - experiments: ???
+  - _self_
+hydra:
+  sweeper:
+    params:
+      datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
+      experiments: modernMT
 ```
-If the code is used as a library/framework, you should provide a quick-start example like the one below:
-```python
-an_object = MyClass(...)
+Then on the command line run: 
+```
+python3 -m scripts.hydra_pipeline -m
+```
+Notice that on the hydra_pipeline.py script there's a "test" boolean flag to perform only the first 5 translations for each dataset.  
+You will find the csv with both sentence-wise and aggregate results in ```./data/processed/metrics```.   
+Similarly, we can run experiments with gpt3. To perform translations with gpt3 it's necessary to prompt the model, our pipeline provides three strategies to do it: random, fuzzy and label (the latter available only with translated datasets).  
+The idea is that we will perform translations by providing few shot examples to the model; the examples are drawn from the development split of the datasets.  
+The three strategies differ on the way that examples are picked: "random" means that examples will be chosen randomly from the pool, "fuzzy" instead that the examples will be chosen according to the semantic similarity of the sentences to the source sentence that has to be translated (exploiting cosine similarity and sentence-bert embeddings).  
+"label" instead it's a more complex way to choose the example, and to use this strategy we need a pool with sentences labeled by domain (e.g. Translated dataset): the fuzzy matches for prompting are performed only on the sentences belonging to the same group as the source sentence that has to be translated.  
+For launching experiments with gpt models, modify the sweeper like this (all the possible configurations are stored in ```./configs/experiments```):  
+```
+defaults:
+  - datasets: ???
+  - experiments: ???
+  - _self_
+hydra:
+  sweeper:
+    params:
+      datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
+      experiments: gpt_fuzzy_3ex
+```
+Then launch the script with the same command as the one for modernMT. 
 
-input_value = "..."
-output_value = an_object.do_something(input_value)
-```
 
 ## The team
 This challenge, sponsored by [S], was carried out by [X], [Y] and [Z] as part of the [N]th edition of Pi School's School of AI program.
