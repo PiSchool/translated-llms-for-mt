@@ -1,0 +1,15 @@
+datasets:
+  dataset: flores
+  test: data/processed/flores/flores-it-en-test.csv
+  emb_src: data/processed/flores/flores-dev-embedding_it.pt
+  dev: data/processed/flores/flores-it-en-dev.csv
+  src_lan: it
+  trg_lan: en
+  sep: ','
+  encoding: utf-8
+  prefix: 'Translate from Italian to Spanish:'
+experiments:
+  model: gpt
+  key: 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
+  n_shots: 3
+  strategy: fuzzy

@@ -4,7 +4,7 @@ from mt2magic.PEFT_fine_tuner import PEFTModel
 
 import argparse
 from pytorch_lightning import seed_everything, Trainer
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
+#from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import WandbLogger
 from transformers import AutoTokenizer, T5Tokenizer
 import torch

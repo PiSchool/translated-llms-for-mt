@@ -12,7 +12,7 @@ Args:
   lora_dropout (float) : a float that represents the dropout rate for the LoRA regularization
   device (str) : which kind of device is used to train, "cuda" or "cpu"
   lr (float) : learning rate
-  quantization (bool) : True to use quantization to int8 (possible if device is gpu)
+  use_quantization (bool) : True to use quantization to int8 (possible if device is gpu)
 """
 class PEFTModel(LightningModule):
   def __init__(self, 
@@ -22,10 +22,10 @@ class PEFTModel(LightningModule):
               lora_dropout:float, 
               device:str, 
               lr:float=1e-3, 
-              quantization=False):
+              use_quantization=False):
     super().__init__()
     
-    self.peft_config = LoraConfig(task_type=TaskType.SEQ_2_SEQ_LM, 
+    self.peft_config = LoraConfig(task_type=TaskType.SEQ_2_SEQ_LM,
                                   inference_mode=False, 
                                   target_modules=["q", "v"], 
                                   r=lora_r, 

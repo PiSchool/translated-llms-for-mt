@@ -1,9 +1,23 @@
 defaults:
   - datasets: ???
   - experiments: ???
+  - ft_models: ???
   - _self_
 hydra:
   sweeper:
     params:
       datasets: translated_it_es
-      experiments: gpt_fuzzy_3ex
+      experiments: fine_tuning
+      ft_models : t5_small
+
+
+# Available models:
+# t5_small -> google/flan-t5-small
+# t5_large -> google/flan-t5-large
+# t5_xl -> google/flan-t5-xl
+# t5_xxl -> google/flan-t5-xxl
+# bloom_small -> bigscience/mt0-small
+# bloom_base -> bigscience/bloom-1b7
+# bloom_big -> bigscience/bloom-3b
+# bloom_xl -> bigscience/bloom-7b1
+# bloom_xxl -> bigscience/bloom
