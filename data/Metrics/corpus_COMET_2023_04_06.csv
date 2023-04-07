@@ -1,0 +1,8 @@
+,Result,corpus_COMET
+0,modernMT-flores-it-en,0.8777308249662045
+1,modernMT-flores-it-es,0.8614414745698804
+2,gpt-flores-it-en-random-3,0.8765970378996355
+3,gpt-flores-it-es-random-3,0.852879459266606
+4,gpt-translated-it-es-random-3,0.8602572947504963
+5,gpt-flores-it-en-fuzzy-3,0.8770001385758517
+6,gpt-flores-it-es-fuzzy-3,0.8526613756778683
