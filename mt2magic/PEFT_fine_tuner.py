@@ -32,7 +32,7 @@ class PEFTModel(LightningModule):
                                   lora_alpha=lora_alpha, 
                                   lora_dropout=lora_dropout
                                   )
-    if quantization:
+    if use_quantization:
       model = AutoModelForSeq2SeqLM.from_pretrained(model_name, load_in_8bit=True, device_map='auto')
       model = prepare_model_for_int8_training(model)
     else:

@@ -144,3 +144,6 @@ translated-challenge/
 #hydra
 multirun/
 outputs/
+
+#keys
+config/keys/

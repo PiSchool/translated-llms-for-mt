@@ -2,6 +2,7 @@ dataset: flores
 test: data/processed/flores/flores-it-es-test.csv
 emb_src: data/processed/flores/flores-dev-embedding_it.pt
 dev: data/processed/flores/flores-it-es-dev.csv
+path: data/external/flores200_dataset/
 src_lan: it
 trg_lan: es
 sep: ','

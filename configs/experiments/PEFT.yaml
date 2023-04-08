@@ -3,9 +3,8 @@ lr : 3e-4
 num_epochs : 1
 batch_size : 1
 accumulate_grad_num : 4
-
 lora_alpha : 32
 lora_dropout : 0.1
 lora_r : 16
 
-w_and_b_key : "f008a102b1eb1e581a8595aa2a0b66d20526ab1e"
+lora_path : models/ciao_t5-small_peft_translated_it_en.ckpt

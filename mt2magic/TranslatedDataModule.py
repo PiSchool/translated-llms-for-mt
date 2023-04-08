@@ -57,7 +57,7 @@ class TranslatedDataModule(LightningDataModule):
 
   def val_dataloader(self):
     val_dataset = PEFTDataset(self.X_val_enc,self.X_val_attention, self.Y_val_enc)
-    return DataLoader(val_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+    return DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
   def test_dataloader(self):
     test_dataset = PEFTDataset(self.X_test_enc, self.X_test_attention, self.Y_test_enc)
@@ -77,10 +77,10 @@ class TranslatedDataModule(LightningDataModule):
     trg_input_ids = []
     for _, row in data.iterrows():
       src_encoding = self.tokenizer.batch_encode_plus(
-            [self.prefix+row["original"]], max_length=self.max_length,  padding="max_length", truncation=True
+            [self.prefix+row["source"]], max_length=self.max_length,  padding="max_length", truncation=True
         )
       trg_encoding = self.tokenizer.batch_encode_plus(
-            [row["translation"]], max_length=self.max_length,  padding="max_length", truncation=True
+            [row["target"]], max_length=self.max_length,  padding="max_length", truncation=True
         )
       
       input_ids.append(src_encoding.get('input_ids')[0])

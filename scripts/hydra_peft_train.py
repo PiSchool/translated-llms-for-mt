@@ -2,17 +2,14 @@ from mt2magic.FloresDataModule import FloresDataModule
 from mt2magic.TranslatedDataModule import TranslatedDataModule
 from mt2magic.PEFT_fine_tuner import PEFTModel
 
-from pytorch_lightning import seed_everything, Trainer
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
+from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
-from transformers import AutoTokenizer, T5Tokenizer
 import torch
 
 from omegaconf import DictConfig
-from omegaconf import OmegaConf
 import hydra
 
-@hydra.main(version_base=None, config_path="../configs", config_name="config")
+@hydra.main(version_base=None, config_path="../configs", config_name="ft_config")
 def fine_tuning(cfg: DictConfig) -> None:
     AVAIL_GPUS = 0
     if torch.cuda.is_available():       
@@ -29,26 +26,37 @@ def fine_tuning(cfg: DictConfig) -> None:
         accelerator = "cpu"
         use_quantization = False
     
-    wandb_logger = WandbLogger(name=f"{cfg.ft_models}_peft_{cfg.datasets}_{cfg.datasets.src_lan}_{cfg.datasets.trg_lan}", 
+    wandb_logger = WandbLogger(name=f"{cfg.ft_models.name}_peft_{cfg.datasets.dataset}_{cfg.datasets.src_lan}_{cfg.datasets.trg_lan}", 
                                project='translated-challenge', 
                                entity='mt2magic', 
                                log_model=True
                                )
+    if cfg.datasets.dataset == "translated":
+        dm = TranslatedDataModule(train_file=cfg.datasets.train, 
+                                val_file=cfg.datasets.dev, 
+                                test_file=cfg.datasets.test,
+                                tokenizer=cfg.ft_models.full_name, 
+                                batch_size=cfg.experiments.batch_size,
+                                max_length=cfg.experiments.max_length, 
+                                prefix=cfg.datasets.prefix
+                                )
+    elif cfg.datasets.dataset == "flores":
+        dm = FloresDataModule(dev_path=cfg.datasets.dev,
+                        devtest_path=cfg.datasets.test,
+                        tokenizer=cfg.ft_models.full_name, 
+                        batch_size=cfg.experiments.batch_size,
+                        max_length=cfg.experiments.max_length, 
+                        prefix=cfg.datasets.prefix
+                        )
+    else:
+        print("The selected dataset is not valid! Use Translated or Flores datasets")
+        return
     
-    dm = TranslatedDataModule(cfg.datasets.train, 
-                            cfg.datasets.dev, 
-                            cfg.datasets.test,
-                            tokenizer=cfg.ft_models, 
-                            batch_size=cfg.experiments.batch_size,
-                            max_length=cfg.experiments.max_length, 
-                            prefix=cfg.datasets.prefix
-                            )
     dm.setup()
-
-    model = PEFTModel(cfg.ft_models.full_name, 
-                      cfg.experiments.lora_r, 
-                      cfg.experiments.lora_alpha, 
-                      cfg.experiments.lora_dropout, 
+    model = PEFTModel(model_name=cfg.ft_models.full_name, 
+                      lora_r=cfg.experiments.lora_r, 
+                      lora_alpha=cfg.experiments.lora_alpha, 
+                      lora_dropout=cfg.experiments.lora_dropout, 
                       device=device, 
                       lr=cfg.experiments.lr, 
                       use_quantization=use_quantization
@@ -61,14 +69,12 @@ def fine_tuning(cfg: DictConfig) -> None:
         accelerator = accelerator,
         devices = AVAIL_GPUS if AVAIL_GPUS else 1, # if we are not using GPUs set this to 1 anyway
         accumulate_grad_batches=cfg.experiments.accumulate_grad_num,
-        logger= wandb_logger,
-        default_root_dir="models/",
-        #callbacks = [EarlyStopping(monitor="val_loss", mode="min", patience=2)]
+        logger= wandb_logger
         )
     
     trainer.fit(model, datamodule=dm)
 
-    trainer.save_checkpoint(f"models/{cfg.ft_models}_peft_{cfg.datasets}_{cfg.datasets.src_lang}_{cfg.datasets.trg_lang}.ckpt")
+    trainer.save_checkpoint(f"models/{cfg.ft_models.name}_peft_{cfg.datasets.dataset}_{cfg.datasets.src_lan}_{cfg.datasets.trg_lan}.ckpt")
 
     print("Done with the fine-tuning!")
 
