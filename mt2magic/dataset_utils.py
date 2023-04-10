@@ -13,7 +13,7 @@ def get_df_from_txt(src_path: str, trg_path: str, src_encoding='utf-8', trg_enco
     return pd.DataFrame(data=output)
 
 
-def get_pool_from_txt(pool_path: str) -> List[str]:
-    with open(pool_path) as f:
+def get_pool_from_txt(pool_path: str, encoding='utf-8') -> List[str]:
+    with open(pool_path, encoding=encoding) as f:
         examples = f.readlines()
         return examples
