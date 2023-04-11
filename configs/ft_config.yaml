@@ -1,0 +1,31 @@
+# Available models:
+# t5_small -> google/flan-t5-small
+# t5_large -> google/flan-t5-large
+# t5_xl -> google/flan-t5-xl
+# t5_xxl -> google/flan-t5-xxl
+# bloom_small -> bigscience/mt0-small
+# bloom_base -> bigscience/bloom-1b7
+# bloom_big -> bigscience/bloom-3b
+# bloom_xl -> bigscience/bloom-7b1
+# bloom_xxl -> bigscience/bloom
+
+# Available datasets
+# translated_it_es
+# translated_it_en
+# flores_it_es
+# flores_it_en
+
+defaults:
+  - datasets: ???
+  - ft_models: ???
+  - experiments: ???
+  - keys: ???
+  - _self_
+
+hydra:
+  sweeper:
+    params:
+      datasets : translated_it_en
+      ft_models : t5_small
+      experiments : PEFT
+      keys : wandb # config file with the key to login in W&B 
