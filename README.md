@@ -51,21 +51,101 @@ Successfully installed nvidia-cublas-cu12-12.1.0.26 nvidia-cuda-runtime-cu12-12.
 /usr/local/lib/python3.9/dist-packages/tensorrt/libnvinfer.so.8
 ```
 
-## Additional data
-Instructions on how to download additional data (datasets, pre-trained models, ...) needed for running the code, specifically any kind of data that cannot be stored in this repo due to its large size.
+## Additional data  
+First of all, be sure to be placed in the directory ```translated-llms-for-mt```.  
+Download the flores dataset by running:  
+```
+./data/scripts/flores-101.sh
+```
+Then download the Translated datasets, you can find the cleaned versions on [gDrive](https://drive.google.com/drive/u/4/folders/14E5dAKdK7pwitSqf6zh233YybA73MzvJ): download the files ```translated-it-en-cleaned.csv``` and ```translated-it-es-cleaned.csv``` and put them in ```translated-llms-for-mt```.  
+Download all the ```.pt``` files [here](https://drive.google.com/drive/u/4/folders/1qecmn7ySukT6CVZZl2CTPKeN1tq3AHkp) (sBert encodings used for fuzzy prompting) and put them in ```translated-llms-for-mt```.  
+Move all the files in the right directories with:  
+```
+./data/scripts/adjust_files.sh
+```
+Now launch the two scripts for splitting and formatting the datasets with:
+```
+python3 -m data.scripts.flores_preprocess
+```  
+and:  
+```
+python3 -m data.scripts.translated_split
+```  
+You can now work with the scripts for evaluation!
+
+
+
 
 ## How to run
-Instructions on how to run the code. For example, if the developed code is used as a CLI tool:
-```
-your_script.py --arg1 val1 --arg2 val2
-```
-If the code is used as a library/framework, you should provide a quick-start example like the one below:
-```python
-an_object = MyClass(...)
+You can test all the approaches on four datasets: flores from italian to english (flores_it_en), flores from italian to spanish (flores_it_es), translated from italian to english (translated_it_en), translated from italian to spanish (translated_it_es).  
+The inference pipeline exploits Hydra, so adding more experiments is as easy as writing a simple YAML file. 
+### ModernMT and GPT-3
+Experiments with gpt3 and ModernMT (read Additional data paragraph first!)  
 
-input_value = "..."
-output_value = an_object.do_something(input_value)
+To run ModernMT evaluation on the datasets, modify the sweeper inputs of ```./configs/config``` like this:
 ```
+defaults:
+  - datasets: ???
+  - experiments: ???
+  - _self_
+hydra:
+  sweeper:
+    params:
+      datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
+      experiments: modernMT
+```
+Then on the command line run: 
+```
+python3 -m scripts.hydra_pipeline -m
+```
+Notice that on the hydra_pipeline.py script there's a "test" boolean flag to perform only the first 5 translations for each dataset.  
+You will find the csv with both sentence-wise and aggregate results in ```./data/processed/metrics```.   
+Similarly, we can run experiments with gpt3. To perform translations with gpt3 it's necessary to prompt the model, our pipeline provides three strategies to do it: random, fuzzy and label (the latter available only with translated datasets).  
+The idea is that we will perform translations by providing few shot examples to the model; the examples are drawn from the development split of the datasets.  
+The three strategies differ on the way that examples are picked: "random" means that examples will be chosen randomly from the pool, "fuzzy" instead that the examples will be chosen according to the semantic similarity of the sentences to the source sentence that has to be translated (exploiting cosine similarity and sentence-bert embeddings).  
+"label" instead it's a more complex way to choose the example, and to use this strategy we need a pool with sentences labeled by domain (e.g. Translated dataset): the fuzzy matches for prompting are performed only on the sentences belonging to the same group as the source sentence that has to be translated.  
+For launching experiments with gpt models, modify the sweeper like this (all the possible configurations are stored in ```./configs/experiments```):  
+```
+defaults:
+  - datasets: ???
+  - experiments: ???
+  - _self_
+hydra:
+  sweeper:
+    params:
+      datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
+      experiments: gpt_fuzzy_3ex
+```
+Then launch the script with the same command as the one for modernMT. 
+
+### PEFT
+Experiments with LoRA on FlanT5 and BLOOM (read Additional data paragraph first!).
+There are two pipelines for the PEFT part of the challenge: one for fine-tuning and one for testing the fine-tuned models.
+To run the pipelines on all the datasets, using for examlpe FlanT5-small, modify the sweeper inputs of ```./configs/ft_config``` like this:
+```
+defaults:
+  - datasets: ???
+  - experiments: ???
+  - _self_
+hydra:
+  sweeper:
+    params:
+      datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
+      ft_models : t5_small
+      experiments: PEFT
+      keys : wandb
+```
+Then, to fine-tune the model, run on the command line: 
+```
+python3 scripts/hydra_peft_train -m
+```
+Instead, to test the model, run on the command line:
+```
+python3 scripts/hydra_peft_test -m
+```
+To run the pipelines on more than one model, pass a list of models' names to ft_models (similarly as in datasets).
+A list of available models (and relative names) is listed at the top of ```./configs/ft_config```.
+To configure the experiments, modify ```./configs/experiments/PEFT.yaml``` file.
 
 ## The team
 This challenge, sponsored by [S], was carried out by [X], [Y] and [Z] as part of the [N]th edition of Pi School's School of AI program.
