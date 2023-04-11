@@ -9,6 +9,12 @@
 # bloom_xl -> bigscience/bloom-7b1
 # bloom_xxl -> bigscience/bloom
 
+# Available datasets
+# translated_it_es
+# translated_it_en
+# flores_it_es
+# flores_it_en
+
 defaults:
   - datasets: ???
   - ft_models: ???
@@ -22,4 +28,4 @@ hydra:
       datasets : translated_it_en
       ft_models : t5_small
       experiments : PEFT
-      keys : wandb
+      keys : wandb # config file with the key to login in W&B 

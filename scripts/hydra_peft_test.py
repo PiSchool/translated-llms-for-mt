@@ -9,12 +9,24 @@ from tqdm import tqdm
 from omegaconf import DictConfig
 import hydra
 
+"""
+  This method generate the translations for the samples in the test set 
+  using a fine-tuned model (fine-tuned with LoRA)
+  and returns a pandas DataFrame that will be used to compute metrics
+  Args:
+    lora_module (str) : path to the folder that contains the config file for LoRA
+    test_path (str) : path to the csv file that contains the source sentences and the target sentences
+    device (str) : device used for the inference (gpu or cpu)
+    prefix (str) : prefix to append to the source sentence
+  Returns: 
+    df (pd.DataFrame) : pandas DataFrame with the source sentences, the target sentences, and the translations
+"""
+
 def get_predictions(lora_module:str,
                     test_path:str, 
                     device:str, 
                     prefix:str
                     ):
-    config_path = lora_module + "adapter_config.json"
     config = PeftConfig.from_pretrained(lora_module)
     # Loading the model in int8 is going to slow down inference for some reason
     model = AutoModelForSeq2SeqLM.from_pretrained(config.base_model_name_or_path)#,  load_in_8bit=True,  device_map='auto')
