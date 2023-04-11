@@ -74,7 +74,7 @@ def fine_tuning(cfg: DictConfig) -> None:
     
     trainer.fit(model, datamodule=dm)
 
-    trainer.save_checkpoint(f"models/{cfg.ft_models.name}_peft_{cfg.datasets.dataset}_{cfg.datasets.src_lan}_{cfg.datasets.trg_lan}.ckpt")
+    model.peft_model.save_pretrained(f"models/{cfg.ft_models.name}_peft_{cfg.datasets.dataset}_{cfg.datasets.src_lan}_{cfg.datasets.trg_lan}/")
 
     print("Done with the fine-tuning!")
 

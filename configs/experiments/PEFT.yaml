@@ -6,5 +6,5 @@ accumulate_grad_num : 4
 lora_alpha : 32
 lora_dropout : 0.1
 lora_r : 16
-
-lora_path : models/ciao_t5-small_peft_translated_it_en.ckpt
+# where you want to save/load the lora module
+lora_path : models/t5-small_peft_translated_it_en/

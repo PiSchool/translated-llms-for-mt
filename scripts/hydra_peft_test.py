@@ -10,15 +10,16 @@ from omegaconf import DictConfig
 import hydra
 
 def get_predictions(lora_module:str,
-                    model_name:str, 
                     test_path:str, 
                     device:str, 
                     prefix:str
                     ):
-    #config = PeftConfig.from_pretrained(lora_module)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name,  load_in_8bit=True,  device_map='auto')
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = PeftModel.from_pretrained(model, lora_module, device_map='auto')
+    config_path = lora_module + "adapter_config.json"
+    config = PeftConfig.from_pretrained(lora_module)
+    # Loading the model in int8 is going to slow down inference for some reason
+    model = AutoModelForSeq2SeqLM.from_pretrained(config.base_model_name_or_path)#,  load_in_8bit=True,  device_map='auto')
+    model = PeftModel.from_pretrained(model, lora_module).to(device)
+    tokenizer = AutoTokenizer.from_pretrained(config.base_model_name_or_path)
     model.eval()
 
     data = pd.read_csv(test_path)
@@ -44,30 +45,20 @@ def test_peft(cfg: DictConfig) -> None:
         print('No GPU available, using the CPU instead.')
         device = torch.device("cpu") 
 
-    df = get_predictions(lora_module=cfg.experiments.lora_path,
-                         model_name=cfg.ft_models.full_name, 
+    test_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/PEFT_{cfg.ft_models.name}-' \
+                         f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}.csv'
+    aggr_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/PEFT_{cfg.ft_models.name}-' \
+                        f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}-aggregate.csv'
+
+    test_df = get_predictions(lora_module=cfg.experiments.lora_path,
                          test_path=cfg.datasets.test, 
                          device=device, 
                          prefix=cfg.datasets.prefix
                         )
-    eval = Evaluator()
-    df_translation = eval.evaluating_from_dataframe(df)
-
-    corpus_bleu = eval.calculate_corpus_bleu(df_translation)
-    mean_bleu = eval.calculate_mean_bleu(df_translation)
-    corpus_chrf = eval.calculate_corpus_chrf(df_translation)
-    mean_chrf = eval.calculate_mean_chrf(df_translation)
-    mean_comet = eval.calculate_system_score_COMET(df_translation)
-    print('*** *** ***')
-    print(f'Corpus BLEU: {corpus_bleu}')
-    print(f'Mean BLEU: {mean_bleu}')
-    print('*** *** ***')
-    print(f'Corpus chrf: {corpus_chrf}')
-    print(f'Mean chrf: {mean_chrf}')
-    print('*** *** ***')
-    print(f'\nMean COMET: {mean_comet}')
-    print('*** *** ***')
-    return
+    evaluator = Evaluator()
+    evaluator.evaluating_from_dataframe(dataframe=test_df, save_path=test_save_path)
+    aggregate_metrics_df = evaluator.calculating_corpus_metrics_from_dataframe(dataframe=test_df)
+    aggregate_metrics_df.to_csv(aggr_save_path)
 
 if __name__ == "__main__":
     test_peft()
