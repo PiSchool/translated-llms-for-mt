@@ -1,6 +1,7 @@
+peft_mode : True # True is fine-tuning with LoRA, False to fine-tune without PEFT
 max_length : 64
 lr : 3e-4
-num_epochs : 1
+num_epochs : 4
 batch_size : 1
 accumulate_grad_num : 4
 lora_alpha : 32

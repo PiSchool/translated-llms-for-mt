@@ -137,11 +137,11 @@ hydra:
 ```
 Then, to fine-tune the model, run on the command line: 
 ```
-python3 scripts/hydra_peft_train -m
+python3 scripts/train_peft.py -m
 ```
 Instead, to test the model, run on the command line:
 ```
-python3 scripts/hydra_peft_test -m
+python3 scripts/test_peft.py -m
 ```
 To run the pipelines on more than one model, pass a list of models' names to ft_models (similarly as in datasets).
 A list of available models (and relative names) is listed at the top of ```./configs/ft_config```.

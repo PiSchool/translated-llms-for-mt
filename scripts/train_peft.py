@@ -8,6 +8,9 @@ import torch
 
 from omegaconf import DictConfig
 import hydra
+import os
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 @hydra.main(version_base=None, config_path="../configs", config_name="ft_config")
 def fine_tuning(cfg: DictConfig) -> None:
@@ -59,7 +62,8 @@ def fine_tuning(cfg: DictConfig) -> None:
                       lora_dropout=cfg.experiments.lora_dropout, 
                       device=device, 
                       lr=cfg.experiments.lr, 
-                      use_quantization=use_quantization
+                      use_quantization=use_quantization,
+                      peft_mode=cfg.experiments.peft_mode
                     )
     
     # if more than one device add devices = AVAIL_GPUS and accumulate_grad_batches
@@ -68,13 +72,14 @@ def fine_tuning(cfg: DictConfig) -> None:
         max_epochs=cfg.experiments.num_epochs,
         accelerator = accelerator,
         devices = AVAIL_GPUS if AVAIL_GPUS else 1, # if we are not using GPUs set this to 1 anyway
+        strategy="dp",
         accumulate_grad_batches=cfg.experiments.accumulate_grad_num,
         logger= wandb_logger
         )
     
     trainer.fit(model, datamodule=dm)
 
-    model.peft_model.save_pretrained(f"models/{cfg.ft_models.name}_peft_{cfg.datasets.dataset}_{cfg.datasets.src_lan}_{cfg.datasets.trg_lan}/")
+    model.model.save_pretrained(f"models/{cfg.ft_models.name}_peft_{cfg.datasets.dataset}_{cfg.datasets.src_lan}_{cfg.datasets.trg_lan}/")
 
     print("Done with the fine-tuning!")
 
