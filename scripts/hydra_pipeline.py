@@ -6,14 +6,16 @@ from mt2magic.make_cfg import prompter_cfg
 from omegaconf import DictConfig
 import hydra
 
-"""
+"""`
 Inference/evaluation pipeline that exploits Hydra configs. Set the combination of experiments
 that you want to perform by modifying the sweeper in configs/config.yaml 
 If performing a test of the pipeline, set the flag "test" to true, so that the experiments will 
 process only the first 5 sentences of the dataset!
 """
 
-test=True
+test = True
+
+
 @hydra.main(version_base=None, config_path="../configs", config_name="config")
 def translate_pipeline(cfg: DictConfig) -> None:
     test_df = pd.read_csv(cfg.datasets.test, sep=cfg.datasets.sep, encoding=cfg.datasets.encoding)
@@ -21,12 +23,28 @@ def translate_pipeline(cfg: DictConfig) -> None:
         test_df = test_df.head()
     if cfg.experiments.model == "gpt":
         stop_seq = ['[target]', '[source]']
-        gpt_param = {'temperature': 0.0, 'max_tokens': 256,'stop': stop_seq}
+        gpt_param = {'temperature': 0.0, 'max_tokens': 256, 'stop': stop_seq}
         prompt_config = prompter_cfg(cfg)
         gpt_translator = gpt3_translator(API_KEY=cfg.experiments.key,
                                          prompt_config=prompt_config,
                                          model_name='davinci',
-                                        param=gpt_param)
+                                         param=gpt_param)
+        gpt_translator.translate(test_df, prompter_config=prompt_config)
+        test_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/{cfg.experiments.model}-' \
+                         f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}-' \
+                         f'{cfg.experiments.strategy}-{cfg.experiments.n_shots}.csv'
+        aggr_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/{cfg.experiments.model}-' \
+                         f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}-' \
+                         f'{cfg.experiments.strategy}-{cfg.experiments.n_shots}-aggregate.csv'
+
+    elif cfg.experiments.model == "gpt3_5":
+        stop_seq = ['[target]', '[source]']
+        gpt_param = {'temperature': 0.0, 'max_tokens': 256, 'stop': stop_seq}
+        prompt_config = prompter_cfg(cfg)
+        gpt_translator = gpt3_translator(API_KEY=cfg.experiments.key,
+                                         prompt_config=prompt_config,
+                                         model_name='text-davinci-003',
+                                         param=gpt_param)
         gpt_translator.translate(test_df, prompter_config=prompt_config)
         test_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/{cfg.experiments.model}-' \
                          f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}-' \
