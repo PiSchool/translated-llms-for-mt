@@ -135,17 +135,18 @@ hydra:
       experiments: PEFT
       keys : wandb
 ```
-Then, to fine-tune the model, run on the command line: 
+In ```./configs/experiments/PEFT.yaml``` you can configure the parameters to train and test the models.
+In ```./configs/keys/wandb.yaml``` is stored the API token to save the results in Weights & Biases (it is asked to input such key the first time you lunched the script).
+Then, to fine-tune and test the model, use the pipeline by running on the command line: 
 ```
-python3 scripts/train_peft.py -m
+python3 scripts/peft_pipeline.py -m
 ```
-Instead, to test the model, run on the command line:
+Instead, to just test the model, run on the command line:
 ```
 python3 scripts/test_peft.py -m
 ```
 To run the pipelines on more than one model, pass a list of models' names to ft_models (similarly as in datasets).
 A list of available models (and relative names) is listed at the top of ```./configs/ft_config```.
-To configure the experiments, modify ```./configs/experiments/PEFT.yaml``` file.
 
 ## The team
 This challenge, sponsored by [S], was carried out by [X], [Y] and [Z] as part of the [N]th edition of Pi School's School of AI program.

@@ -28,7 +28,7 @@ class TranslatedDataModule(LightningDataModule):
               max_length:int=128, 
               batch_size:int=32, 
               num_workers:int=1,
-              prefix:str="Translate from Italian to Spanish"
+              prefix:str="Translate from Italian to Spanish:"
               ):
     super().__init__()
 
@@ -49,7 +49,7 @@ class TranslatedDataModule(LightningDataModule):
     
     self.X_train_enc, self.X_train_attention, self.Y_train_enc = self.preprocess_data(train_data)
     self.X_val_enc, self.X_val_attention, self.Y_val_enc = self.preprocess_data(val_data)
-    self.X_test_enc, self.X_test_attention, self.Y_test_enc = self.preprocess_data(test_data)
+    #self.X_test_enc, self.X_test_attention, self.Y_test_enc = self.preprocess_data(test_data)
 
   def train_dataloader(self):
     train_dataset = PEFTDataset(self.X_train_enc,self.X_train_attention, self.Y_train_enc)
