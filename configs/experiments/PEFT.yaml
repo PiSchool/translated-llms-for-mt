@@ -11,6 +11,11 @@ accumulate_grad_num : 4
 # (stage 3 shards optimizer dtates, gradient, and model parameters) -> increase in distributed communication but better memory usage
 strategy : 3
 
+# Precision -> Double precision: 64, full precision: 32, 16bit mixed precision: 16
+# for more info check the documentation (https://lightning.ai/docs/pytorch/stable/common/trainer.html)
+# For usage on CPU, this parameter is not used and 32-true is the default option
+precision : 16
+
 # True to use quantization, False otherwise
 quantization : False
 
@@ -22,7 +27,7 @@ lora_r : 16
 # where you want to save/load the lora module
 lora_path : models/t5-small_peft_translated_it_en/
 
-# limit the number of samples on which evaluate the model, set to 0 tto test on the whole test set
-limit : 10
+# limit the number of samples on which evaluate the model, set to 0 to test on the whole test set
+limit : 0
 
 

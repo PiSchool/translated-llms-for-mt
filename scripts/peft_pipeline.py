@@ -118,7 +118,10 @@ def fine_tuning(cfg: DictConfig) -> None:
     
     # if more than one device add devices = AVAIL_GPUS and accumulate_grad_batches
     # for reproducibility add deterministic = True
-    if cfg.experiments.strategy == 3:
+    if accelerator=="cpu":
+        deepspeed_strategy = "ddp"
+        precision = "32-true"
+    elif cfg.experiments.strategy == 3:
         deepspeed_strategy = "deepspeed_stage_3"
     else:
         deepspeed_strategy = "deepspeed_stage_2"
@@ -127,7 +130,7 @@ def fine_tuning(cfg: DictConfig) -> None:
         accelerator = accelerator,
         devices = AVAIL_GPUS if AVAIL_GPUS else 1, # if we are not using GPUs set this to 1 anyway
         strategy=deepspeed_strategy, 
-        precision=16,
+        precision=precision,
         accumulate_grad_batches=cfg.experiments.accumulate_grad_num,
         logger= wandb_logger
         )
