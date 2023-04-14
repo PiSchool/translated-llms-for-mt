@@ -1,5 +1,5 @@
 import torch
-from pytorch_lightning import LightningModule
+import lightning as L
 from transformers import AutoModelForSeq2SeqLM
 from peft import LoraConfig, TaskType, get_peft_model, prepare_model_for_int8_training
 
@@ -15,7 +15,7 @@ Args:
   use_quantization (bool) : True to use quantization to int8 (possible if device is gpu)
   peft_mode (bool) : True to use LoRA, False to fine-tune the model in a "classic" way
 """
-class PEFTModel(LightningModule):
+class PEFTModel(L.LightningModule):
   def __init__(self, 
               model_name:str, 
               lora_r:int, 

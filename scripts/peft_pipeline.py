@@ -5,9 +5,9 @@ from mt2magic.PEFT_fine_tuner import PEFTModel
 from mt2magic.evaluator import Evaluator
 
 import pandas as pd
-from pytorch_lightning import Trainer
-from pytorch_lightning.loggers import WandbLogger
-from pytorch_lightning.plugins import DeepSpeedPlugin
+import lightning as L
+from lightning.pytorch.loggers import WandbLogger
+from lightning.pytorch.strategies import DeepSpeedStrategy
 import torch
 from transformers import pipeline
 
@@ -71,7 +71,7 @@ def fine_tuning(cfg: DictConfig) -> None:
         print(f'There are {AVAIL_GPUS} GPU(s) available.')
         print('Device name:', torch.cuda.get_device_name(0))
         accelerator = "gpu"
-        use_quantization = True
+        use_quantization = cfg.experiments.quantization
                                                                                                                                                                                                                                                 
     else:
         print('No GPU available, using the CPU instead.')
@@ -118,18 +118,23 @@ def fine_tuning(cfg: DictConfig) -> None:
     
     # if more than one device add devices = AVAIL_GPUS and accumulate_grad_batches
     # for reproducibility add deterministic = True
-    trainer = Trainer(
+    if cfg.experiments.strategy == 3:
+        deepspeed_strategy = "deepspeed_stage_3"
+    else:
+        deepspeed_strategy = "deepspeed_stage_2"
+    trainer = L.Trainer(
         max_epochs=cfg.experiments.num_epochs,
         accelerator = accelerator,
         devices = AVAIL_GPUS if AVAIL_GPUS else 1, # if we are not using GPUs set this to 1 anyway
-        plugins=DeepSpeedPlugin(stage=3),
+        strategy=deepspeed_strategy, 
+        precision=16,
         accumulate_grad_batches=cfg.experiments.accumulate_grad_num,
         logger= wandb_logger
         )
     
     print("Fine-tuning...")
 
-    trainer.fit(model, datamodule=dm)
+    trainer.fit(model, train_dataloaders=dm.train_dataloader(), val_dataloaders=dm.val_dataloader())
 
     model.model.save_pretrained(f"models/{cfg.ft_models.name}_peft_{cfg.datasets.dataset}_{cfg.datasets.src_lan}_{cfg.datasets.trg_lan}/")
 

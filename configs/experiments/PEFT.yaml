@@ -1,13 +1,28 @@
 peft_mode : True # True is fine-tuning with LoRA, False to fine-tune without PEFT
-max_length : 64
+
+# Training parameters
+max_length : 256
 lr : 3e-4
-num_epochs : 2
+num_epochs : 1
 batch_size : 2
 accumulate_grad_num : 4
+
+# Deepspeed strategy -> 2 for ZeRO stage 2, 3 for ZeRO stage 3 
+# (stage 3 shards optimizer dtates, gradient, and model parameters) -> increase in distributed communication but better memory usage
+strategy : 3
+
+# True to use quantization, False otherwise
+quantization : False
+
+# LoRA parameters
 lora_alpha : 32
 lora_dropout : 0.1
 lora_r : 16
+
 # where you want to save/load the lora module
 lora_path : models/t5-small_peft_translated_it_en/
+
 # limit the number of samples on which evaluate the model, set to 0 tto test on the whole test set
 limit : 10
+
+
