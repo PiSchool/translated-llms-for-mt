@@ -7,6 +7,7 @@ from mt2magic.evaluator import Evaluator
 import pandas as pd
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.plugins import DeepSpeedPlugin
 import torch
 from transformers import pipeline
 
@@ -121,7 +122,7 @@ def fine_tuning(cfg: DictConfig) -> None:
         max_epochs=cfg.experiments.num_epochs,
         accelerator = accelerator,
         devices = AVAIL_GPUS if AVAIL_GPUS else 1, # if we are not using GPUs set this to 1 anyway
-        strategy="dp",
+        plugins=DeepSpeedPlugin(stage=3),
         accumulate_grad_batches=cfg.experiments.accumulate_grad_num,
         logger= wandb_logger
         )
