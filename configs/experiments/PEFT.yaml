@@ -35,6 +35,7 @@ repetition_penalty : 1.0
 # Exponential penalty to the length that is used with beam-based generation (default : 1)
 length_penalty : 1.0
 # Whether or not to use sampling ; use greedy decoding otherwise (default: False)
+# For BLOOM is better to use greedy decoding
 do_sample : False
 # The number of independently computed returned sequences for each element in the batch (default : 1)
 num_return_sequences : 1

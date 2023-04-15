@@ -43,9 +43,9 @@ class TranslatedDataModule(LightningDataModule):
     self.prefix = prefix
 
   def setup(self, stage:str=None):
-    train_data = pd.read_csv(self.train_file).iloc[:100]
-    val_data = pd.read_csv(self.val_file).iloc[:100]
-    test_data = pd.read_csv(self.test_file).iloc[:100]
+    train_data = pd.read_csv(self.train_file)#.iloc[:100]
+    val_data = pd.read_csv(self.val_file)#.iloc[:100]
+    #test_data = pd.read_csv(self.test_file).iloc[:100]
     
     self.X_train_enc, self.X_train_attention, self.Y_train_enc = self.preprocess_data(train_data)
     self.X_val_enc, self.X_val_attention, self.Y_val_enc = self.preprocess_data(val_data)
