@@ -26,8 +26,9 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
     model_type (str) : name of the model we are testing (bloom or t5)
     test_path (str) : path to the csv file that contains the source sentences and the target sentences
     device (str) : device used for the inference (gpu or cpu)
-    prefix (str) : prefix to append to the source sentence
     generate_config (:obj) : config file for the experiments
+    src_lan (str) : language of the source text
+    trg_lan (str) : language of the target text
     limit (int) : number of samples of the test set used for evaluation
   Returns: 
     df (pd.DataFrame) : pandas DataFrame with the source sentences, the target sentences, and the translations
@@ -37,8 +38,9 @@ def get_predictions(model,
                     model_type:str,
                     test_path:str,
                     device:str, 
-                    prefix:str,
                     generate_config,
+                    src_lan:str,
+                    trg_lan:str,
                     limit:int=0,
                     ):
     model.eval()
@@ -50,7 +52,7 @@ def get_predictions(model,
     else:
         raise Exception("The accepted model are: BLOOM and T5!")
     
-    dataset = TestPEFTDataset(test_path, prefix)
+    dataset = TestPEFTDataset(test_path, prompt_type=generate_config.prompt_type, src_lan=src_lan, trg_lan=trg_lan)
     results = []
     df = pd.read_csv(test_path)
     if limit > 0:
@@ -103,7 +105,10 @@ def fine_tuning(cfg: DictConfig) -> None:
                                 tokenizer=cfg.ft_models.full_name, 
                                 batch_size=cfg.experiments.batch_size,
                                 max_length=cfg.experiments.max_length, 
-                                prefix=cfg.datasets.prefix
+                                prefix_type=cfg.experiments.prompt_type,
+                                src_lan=cfg.datasets.languageA,
+                                trg_lan=cfg.datasets.languageB,
+                                limit=cfg.experiments.limit_train
                                 )
     elif cfg.datasets.dataset == "flores":
         dm = FloresDataModule(dev_path=cfg.datasets.dev,
@@ -133,10 +138,12 @@ def fine_tuning(cfg: DictConfig) -> None:
     if accelerator=="cpu":
         deepspeed_strategy = "ddp"
         precision = "32-true"
-    elif cfg.experiments.strategy == 3:
+    elif cfg.experiments.strategy == 2:
         deepspeed_strategy = "deepspeed_stage_3"
+        precision = cfg.experiments.precision
     else:
-        deepspeed_strategy = "deepspeed_stage_2"
+        deepspeed_strategy = "deepspeed_stage_3"
+        precision = cfg.experiments.precision
     trainer = L.Trainer(
         max_epochs=cfg.experiments.num_epochs,
         accelerator = accelerator,
@@ -165,11 +172,12 @@ def fine_tuning(cfg: DictConfig) -> None:
     test_df = get_predictions(model.model, 
                             model_type=cfg.ft_models.name, 
                             tokenizer=dm.tokenizer, 
-                            test_path=cfg.datasets.test, 
-                            prefix=cfg.datasets.prefix, 
+                            test_path=cfg.datasets.test,  
                             device=device,
-                            limit=cfg.experiments.limit,
-                            generate_config=cfg.experiments
+                            limit=cfg.experiments.limit_test,
+                            generate_config=cfg.experiments,
+                            src_lan=cfg.datasets.languageA,
+                            trg_lan=cfg.datasets.languageB
                             )
     evaluator = Evaluator()
     evaluator.evaluating_from_dataframe(dataframe=test_df, save_path=test_save_path)

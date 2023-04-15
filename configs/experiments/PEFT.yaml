@@ -2,6 +2,11 @@
 lora_path : models/t5-small_peft_translated_it_en/
 # True is fine-tuning with LoRA, False to fine-tune without PEFT
 peft_mode : True 
+# Kind of prompt: possible alternatives A,B, or C (look ar mt2magic/prompter_bloom.py for more info)
+# Set to B for T5
+prompt_type : C
+# Limit the number of samples on which train (and validate) the model, set to 0 to train on the whole train set (and validation set)
+limit_train : 100
 
 # Training parameters
 max_length : 256
@@ -26,8 +31,8 @@ lora_r : 16
 
 ### Set the parameters for the generation of the translation
 
-# limit the number of samples on which evaluate the model, set to 0 to test on the whole test set
-limit : 10
+# Limit the number of samples on which evaluate the model, set to 0 to test on the whole test set
+limit_test : 10
 # The value used to modulate the next token probabilities
 temperature : 1.0
 # The parameter for repetition penalty -> 1.0 means no penalty (default : 1)

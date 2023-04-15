@@ -7,6 +7,6 @@ src_lan: it
 trg_lan: en
 sep: ','
 encoding: utf-8
-prefix : "Translate from Italian to English:"
+#prefix : "Translate from Italian to English:"
 languageA : Italian
 languageB : English

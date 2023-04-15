@@ -18,7 +18,8 @@ import hydra
     model_type (str) : name of the model we are testing (bloom or t5)
     test_path (str) : path to the csv file that contains the source sentences and the target sentences
     device (str) : device used for the inference (gpu or cpu)
-    prefix (str) : prefix to append to the source sentence
+    src_lan (str) : language of the source text
+    trg_lan (str) : language of the target text
     generate_config (:obj) : config file for the experiments
     limit (int) : number of samples of the test set used for evaluation
   Returns: 
@@ -28,7 +29,8 @@ def get_predictions(lora_module:str,
                     model_type:str,
                     test_path:str,
                     device:str, 
-                    prefix:str,
+                    src_lan:str,
+                    trg_lan:str,
                     generate_config,
                     limit:int=0,
                     ):
@@ -50,7 +52,7 @@ def get_predictions(lora_module:str,
     else:
         raise Exception("The accepted model are: BLOOM and T5!")
     
-    dataset = TestPEFTDataset(test_path, prefix)
+    dataset = TestPEFTDataset(test_path, prompt_type=generate_config.prompt_type, src_lan=src_lan, trg_lan=trg_lan)
     results = []
     df = pd.read_csv(test_path)
     if limit > 0:
@@ -96,9 +98,10 @@ def test_peft(cfg: DictConfig) -> None:
     test_df = get_predictions(lora_module=cfg.experiments.lora_path,
                             model_type=cfg.ft_models.name,
                             test_path=cfg.datasets.test, 
+                            src_lan=cfg.datasets.languageA,
+                            trg_lan=cfg.datasets.languageB,
                             device=device, 
-                            prefix=cfg.datasets.prefix,
-                            limit=cfg.experiments.limit,
+                            limit=cfg.experiments.limit_test,
                             generate_config= cfg.experiments
                             )
     

@@ -120,8 +120,8 @@ Then launch the script with the same command as the one for modernMT.
 
 ### PEFT
 Experiments with LoRA on FlanT5 and BLOOM (read Additional data paragraph first!).
-There are two pipelines for the PEFT part of the challenge: one for fine-tuning and one for testing the fine-tuned models.
-To run the pipelines on all the datasets, using for examlpe FlanT5-small, modify the sweeper inputs of ```./configs/ft_config``` like this:
+There are two pipelines for the PEFT part of the challenge: one for fine-tuning and testing and one just for testing a fine-tuned models.
+To run the pipelines on all the datasets, using for examlpe FlanT5-small, modify the sweeper inputs of ```./configs/ft_config.yaml``` like this (the pipelines works just on Translated datasets, since we are not going to fine-tune of Flores dataset anymore):
 ```
 defaults:
   - datasets: ???
@@ -130,12 +130,20 @@ defaults:
 hydra:
   sweeper:
     params:
-      datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
+      datasets: translated_it_en,translated_it_es
       ft_models : t5_small
       experiments: PEFT
       keys : wandb
 ```
-In ```./configs/experiments/PEFT.yaml``` you can configure the parameters to train and test the models.
+In ```./configs/experiments/PEFT.yaml``` you can configure the parameters to train and test the models. Using this config file we can control:
+- the hyperparameters of  the fine-tunings;
+- the parameters of the generation of the translations;
+- where to store the weights of the fine-tuned model;
+- whether to apply quantization, precision, and LoRA;
+- which deepspeed approach to use;
+- which prompting technique to use;
+- the dimension of the subset of the train/test set we want to use (if we do not want to use the whole set)
+
 In ```./configs/keys/wandb.yaml``` is stored the API token to save the results in Weights & Biases (it is asked to input such key the first time you lunched the script).
 Then, to fine-tune and test the model, use the pipeline by running on the command line: 
 ```
@@ -146,7 +154,7 @@ Instead, to just test the model, run on the command line:
 python3 scripts/test_peft.py -m
 ```
 To run the pipelines on more than one model, pass a list of models' names to ft_models (similarly as in datasets).
-A list of available models (and relative names) is listed at the top of ```./configs/ft_config```.
+A list of available models (and relative names) is listed at the top of ```./configs/ft_config.yaml```.
 
 ## The team
 This challenge, sponsored by [S], was carried out by [X], [Y] and [Z] as part of the [N]th edition of Pi School's School of AI program.
