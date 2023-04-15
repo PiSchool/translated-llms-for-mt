@@ -7,9 +7,8 @@ from mt2magic.evaluator import Evaluator
 import pandas as pd
 import lightning as L
 from lightning.pytorch.loggers import WandbLogger
-from lightning.pytorch.strategies import DeepSpeedStrategy
 import torch
-from transformers import pipeline
+from transformers import TextGenerationPipeline, Text2TextGenerationPipeline
 
 from omegaconf import DictConfig
 import hydra
@@ -24,27 +23,33 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
   Args:
     model (:obj) : model to be tested
     tokenizer (:obj) : tokenizer used
+    model_type (str) : name of the model we are testing (bloom or t5)
     test_path (str) : path to the csv file that contains the source sentences and the target sentences
-    prefix (str) : prefix to append to the source sentence
-    src_lan (str) : language of the source text
-    trg_lan (str) : language of the target text
-    batch_size (int) : dimension of the batches
     device (str) : device used for the inference (gpu or cpu)
+    prefix (str) : prefix to append to the source sentence
+    generate_config (:obj) : config file for the experiments
     limit (int) : number of samples of the test set used for evaluation
   Returns: 
     df (pd.DataFrame) : pandas DataFrame with the source sentences, the target sentences, and the translations
 """
-def get_predictions(model, 
-                    tokenizer, 
-                    test_path:str, 
-                    prefix:str, 
-                    src_lan:str, 
-                    trg_lan:str, 
-                    batch_size:int, 
-                    device:str,
-                    limit:int
+def get_predictions(model,
+                    tokenizer,
+                    model_type:str,
+                    test_path:str,
+                    device:str, 
+                    prefix:str,
+                    generate_config,
+                    limit:int=0,
                     ):
-    translator = pipeline(f"translation_{src_lan}_to_{trg_lan}", model=model, tokenizer=tokenizer, device=device)
+    model.eval()
+
+    if "bloom" in model_type:
+        translator = TextGenerationPipeline(model=model, tokenizer=tokenizer, device=device)
+    elif "t5" in model_type:
+        translator = Text2TextGenerationPipeline(model=model, tokenizer=tokenizer, device=device)
+    else:
+        raise Exception("The accepted model are: BLOOM and T5!")
+    
     dataset = TestPEFTDataset(test_path, prefix)
     results = []
     df = pd.read_csv(test_path)
@@ -52,12 +57,20 @@ def get_predictions(model,
         df = df.iloc[:limit]
     elif limit == 0:
         limit = len(df)
-    for translated_text in translator(dataset, batch_size=batch_size):
-        results.append(translated_text[0]["translation_text"])
+    for translated_text in translator(dataset, 
+                                    batch_size=generate_config.batch_size, 
+                                    temperature=generate_config.temperature, 
+                                    repetition_penalty=generate_config.repetition_penalty, 
+                                    length_penalty=generate_config.length_penalty,
+                                    do_sample=generate_config.do_sample,
+                                    num_return_sequences=generate_config.num_return_sequences
+                                    ):
+        results.append(translated_text[0]["generated_text"])
         if limit > 1:
             limit -= 1
         elif limit == 1:
             break
+    
     df["translation"] = results
     res = df[["source", "target", "translation"]]
     return res
@@ -71,8 +84,7 @@ def fine_tuning(cfg: DictConfig) -> None:
         print(f'There are {AVAIL_GPUS} GPU(s) available.')
         print('Device name:', torch.cuda.get_device_name(0))
         accelerator = "gpu"
-        use_quantization = cfg.experiments.quantization
-                                                                                                                                                                                                                                                
+        use_quantization = cfg.experiments.quantization                                                                                                                                                                                                                                       
     else:
         print('No GPU available, using the CPU instead.')
         device = torch.device("cpu")   
@@ -106,7 +118,7 @@ def fine_tuning(cfg: DictConfig) -> None:
         return
     
     dm.setup()
-    model = PEFTModel(model_name=cfg.ft_models.full_name, 
+    model = PEFTModel(model_name=cfg.ft_models.full_name,
                       lora_r=cfg.experiments.lora_r, 
                       lora_alpha=cfg.experiments.lora_alpha, 
                       lora_dropout=cfg.experiments.lora_dropout, 
@@ -151,15 +163,14 @@ def fine_tuning(cfg: DictConfig) -> None:
                         f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}-aggregate.csv'
 
     test_df = get_predictions(model.model, 
-                              tokenizer=dm.tokenizer, 
-                              test_path=cfg.datasets.test, 
-                              prefix=cfg.datasets.prefix, 
-                              batch_size=cfg.experiments.batch_size,
-                              device=device,
-                              src_lan=cfg.datasets.src_lan,
-                              trg_lan=cfg.datasets.trg_lan,
-                              limit=cfg.experiments.limit
-                              )
+                            model_type=cfg.ft_models.name, 
+                            tokenizer=dm.tokenizer, 
+                            test_path=cfg.datasets.test, 
+                            prefix=cfg.datasets.prefix, 
+                            device=device,
+                            limit=cfg.experiments.limit,
+                            generate_config=cfg.experiments
+                            )
     evaluator = Evaluator()
     evaluator.evaluating_from_dataframe(dataframe=test_df, save_path=test_save_path)
     aggregate_metrics_df = evaluator.calculating_corpus_metrics_from_dataframe(dataframe=test_df)

@@ -1,4 +1,7 @@
-peft_mode : True # True is fine-tuning with LoRA, False to fine-tune without PEFT
+# Where you want to save/load the fine-tuned model
+lora_path : models/t5-small_peft_translated_it_en/
+# True is fine-tuning with LoRA, False to fine-tune without PEFT
+peft_mode : True 
 
 # Training parameters
 max_length : 256
@@ -10,24 +13,28 @@ accumulate_grad_num : 4
 # Deepspeed strategy -> 2 for ZeRO stage 2, 3 for ZeRO stage 3 
 # (stage 3 shards optimizer dtates, gradient, and model parameters) -> increase in distributed communication but better memory usage
 strategy : 3
-
 # Precision -> Double precision: 64, full precision: 32, 16bit mixed precision: 16
 # for more info check the documentation (https://lightning.ai/docs/pytorch/stable/common/trainer.html)
 # For usage on CPU, this parameter is not used and 32-true is the default option
 precision : 16
-
 # True to use quantization, False otherwise
 quantization : False
-
 # LoRA parameters
 lora_alpha : 32
 lora_dropout : 0.1
 lora_r : 16
 
-# where you want to save/load the lora module
-lora_path : models/t5-small_peft_translated_it_en/
+### Set the parameters for the generation of the translation
 
 # limit the number of samples on which evaluate the model, set to 0 to test on the whole test set
-limit : 0
-
-
+limit : 10
+# The value used to modulate the next token probabilities
+temperature : 1.0
+# The parameter for repetition penalty -> 1.0 means no penalty (default : 1)
+repetition_penalty : 1.0
+# Exponential penalty to the length that is used with beam-based generation (default : 1)
+length_penalty : 1.0
+# Whether or not to use sampling ; use greedy decoding otherwise (default: False)
+do_sample : False
+# The number of independently computed returned sequences for each element in the batch (default : 1)
+num_return_sequences : 1
