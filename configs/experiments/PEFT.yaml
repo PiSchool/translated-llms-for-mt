@@ -2,9 +2,17 @@
 lora_path : models/t5-small_peft_translated_it_en/
 # True is fine-tuning with LoRA, False to fine-tune without PEFT
 peft_mode : True 
-# Kind of prompt: possible alternatives A,B, or C (look ar mt2magic/prompter_bloom.py for more info)
+
+# Kind of prompt: possible alternatives A,B, or C (look ar mt2magic/prompter_bloom.py for more info):
+# - 'A': '{src_lan}: {src_sent}
+#         {trg_lan}:'
+# - 'B': 'Translate the following text from {src_lan} to {trg_lan}:{src_sent}'.
+# - 'C': 'Translate the following text from {src_lan} to {trg_lan}:
+#         {src_lan}: {src_sent}
+#         {trg_lan}:'
 # Set to B for T5
 prompt_type : C
+
 # Limit the number of samples on which train (and validate) the model, set to 0 to train on the whole train set (and validation set)
 limit_train : 100
 
