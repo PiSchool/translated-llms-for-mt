@@ -31,7 +31,7 @@ class TranslatedDataModule(LightningDataModule):
               tokenizer:str, 
               max_length:int=128, 
               batch_size:int=32, 
-              num_workers:int=1,
+              num_workers:int=0,
               prefix_type:str="B",
               src_lan:str="Italian",
               trg_lan:str="English",

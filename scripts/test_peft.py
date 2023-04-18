@@ -95,7 +95,9 @@ def test_peft(cfg: DictConfig) -> None:
     aggr_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/PEFT_{cfg.ft_models.name}-' \
                         f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}-aggregate.csv'
 
-    test_df = get_predictions(lora_module=cfg.experiments.lora_path,
+    lora_path = f"models/{cfg.ft_models.name}_peft_{cfg.datasets.dataset}_{cfg.datasets.src_lan}_{cfg.datasets.trg_lan}/"
+    
+    test_df = get_predictions(lora_module=lora_path,
                             model_type=cfg.ft_models.name,
                             test_path=cfg.datasets.test, 
                             src_lan=cfg.datasets.languageA,

@@ -1,5 +1,5 @@
 from mt2magic.TestPEFTDataset import TestPEFTDataset
-from mt2magic.FloresDataModule import FloresDataModule
+#from mt2magic.FloresDataModule import FloresDataModule
 from mt2magic.TranslatedDataModule import TranslatedDataModule
 from mt2magic.PEFT_fine_tuner import PEFTModel
 from mt2magic.evaluator import Evaluator
@@ -10,7 +10,7 @@ from lightning.pytorch.loggers import WandbLogger
 import torch
 from transformers import TextGenerationPipeline, Text2TextGenerationPipeline
 
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 import hydra
 import os
 
@@ -50,7 +50,7 @@ def get_predictions(model,
     elif "t5" in model_type:
         translator = Text2TextGenerationPipeline(model=model, tokenizer=tokenizer, device=device)
     else:
-        raise Exception("The accepted model are: BLOOM and T5!")
+        raise Exception("The accepted model are: bloom and t5!")
     
     dataset = TestPEFTDataset(test_path, prompt_type=generate_config.prompt_type, src_lan=src_lan, trg_lan=trg_lan)
     results = []
@@ -104,24 +104,26 @@ def fine_tuning(cfg: DictConfig) -> None:
                                 test_file=cfg.datasets.test,
                                 tokenizer=cfg.ft_models.full_name, 
                                 batch_size=cfg.experiments.batch_size,
+                                num_workers=cfg.experiments.num_workers,
                                 max_length=cfg.experiments.max_length, 
                                 prefix_type=cfg.experiments.prompt_type,
                                 src_lan=cfg.datasets.languageA,
                                 trg_lan=cfg.datasets.languageB,
                                 limit=cfg.experiments.limit_train
                                 )
-    elif cfg.datasets.dataset == "flores":
-        dm = FloresDataModule(dev_path=cfg.datasets.dev,
-                        devtest_path=cfg.datasets.test,
-                        tokenizer=cfg.ft_models.full_name, 
-                        batch_size=cfg.experiments.batch_size,
-                        max_length=cfg.experiments.max_length, 
-                        prefix=cfg.datasets.prefix
-                        )
+    # elif cfg.datasets.dataset == "flores":
+    #     dm = FloresDataModule(dev_path=cfg.datasets.dev,
+    #                     devtest_path=cfg.datasets.test,
+    #                     tokenizer=cfg.ft_models.full_name, 
+    #                     batch_size=cfg.experiments.batch_size,
+    #                     max_length=cfg.experiments.max_length, 
+    #                     prefix=cfg.datasets.prefix
+    #                     )
     else:
-        print("The selected dataset is not valid! Use Translated or Flores datasets")
-        return
+        raise Exception("The selected dataset is not valid! Use Translated datasets")
     
+    wandb_logger.experiment.config.update = OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
+
     dm.setup()
     model = PEFTModel(model_name=cfg.ft_models.full_name,
                       lora_r=cfg.experiments.lora_r, 
@@ -133,17 +135,20 @@ def fine_tuning(cfg: DictConfig) -> None:
                       peft_mode=cfg.experiments.peft_mode
                     )
     
-    # if more than one device add devices = AVAIL_GPUS and accumulate_grad_batches
-    # for reproducibility add deterministic = True
     if accelerator=="cpu":
         deepspeed_strategy = "ddp"
-        precision = "32-true"
-    elif cfg.experiments.strategy == 2:
-        deepspeed_strategy = "deepspeed_stage_3"
-        precision = cfg.experiments.precision
+        precision = "bf16-mixed"
     else:
-        deepspeed_strategy = "deepspeed_stage_3"
-        precision = cfg.experiments.precision
+        if not use_quantization:
+            precision = cfg.experiments.precision
+        else:
+            precision = "32-true"
+
+        if cfg.experiments.strategy == 2:
+            deepspeed_strategy = "deepspeed_stage_3"
+        else:
+            deepspeed_strategy = "deepspeed_stage_3"
+
     trainer = L.Trainer(
         max_epochs=cfg.experiments.num_epochs,
         accelerator = accelerator,

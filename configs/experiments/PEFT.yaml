@@ -1,5 +1,3 @@
-# Where you want to save/load the fine-tuned model
-lora_path : models/t5-small_peft_translated_it_en/
 # True is fine-tuning with LoRA, False to fine-tune without PEFT
 peft_mode : True 
 
@@ -10,28 +8,34 @@ peft_mode : True
 # - 'C': 'Translate the following text from {src_lan} to {trg_lan}:
 #         {src_lan}: {src_sent}
 #         {trg_lan}:'
-# Set to B for T5
+# Set to B for T5, C should be the best for BLOOM
 prompt_type : C
 
 # Limit the number of samples on which train (and validate) the model, set to 0 to train on the whole train set (and validation set)
 limit_train : 100
+# Number of subprocesses to use for data loading, 0 means that the data will be loaded in the main process.
+# More workers -> more RAM usage. On the internet they suggest to use num_worker = 4 * num_GPU, but I could not try it locally on my PC (in my case num_GPU=0 :'))
+num_workers : 0
 
 # Training parameters
 max_length : 256
 lr : 3e-4
-num_epochs : 1
-batch_size : 2
+num_epochs : 2
+batch_size : 16
 accumulate_grad_num : 4
 
 # Deepspeed strategy -> 2 for ZeRO stage 2, 3 for ZeRO stage 3 
 # (stage 3 shards optimizer dtates, gradient, and model parameters) -> increase in distributed communication but better memory usage
 strategy : 3
+
 # Precision -> Double precision: 64, full precision: 32, 16bit mixed precision: 16
 # for more info check the documentation (https://lightning.ai/docs/pytorch/stable/common/trainer.html)
 # For usage on CPU, this parameter is not used and 32-true is the default option
+# If quantization is True, then this parameter will not be used
 precision : 16
-# True to use quantization, False otherwise
-quantization : False
+# True to use 8int() quantization, False otherwise
+quantization : True
+
 # LoRA parameters
 lora_alpha : 32
 lora_dropout : 0.1
@@ -40,7 +44,7 @@ lora_r : 16
 ### Set the parameters for the generation of the translation
 
 # Limit the number of samples on which evaluate the model, set to 0 to test on the whole test set
-limit_test : 10
+limit_test : 50
 # The value used to modulate the next token probabilities
 temperature : 1.0
 # The parameter for repetition penalty -> 1.0 means no penalty (default : 1)
