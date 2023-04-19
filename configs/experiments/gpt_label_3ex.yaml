@@ -1,4 +1,4 @@
 model: gpt
-key: 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
+key: dummy_token_for_fine_tuning
 n_shots: 3
 strategy: label
