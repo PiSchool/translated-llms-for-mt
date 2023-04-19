@@ -12,6 +12,8 @@
 # Available datasets
 # translated_it_es
 # translated_it_en
+# translated_big_it_es
+# translated_big_it_en
 
 defaults:
   - datasets: ???
@@ -23,7 +25,7 @@ defaults:
 hydra:
   sweeper:
     params:
-      datasets : translated_it_en
+      datasets : translated_big_it_en
       ft_models : bloom_small
       experiments : PEFT
       keys : wandb # config file with the key to login in W&B 

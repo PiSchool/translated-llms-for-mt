@@ -98,7 +98,7 @@ def fine_tuning(cfg: DictConfig) -> None:
                                entity='mt2magic', 
                                log_model=True
                                )
-    if cfg.datasets.dataset == "translated":
+    if cfg.datasets.dataset == "translated" or cfg.datasets.dataset == "translated_big":
         dm = TranslatedDataModule(train_file=cfg.datasets.train, 
                                 val_file=cfg.datasets.dev, 
                                 test_file=cfg.datasets.test,
@@ -166,6 +166,9 @@ def fine_tuning(cfg: DictConfig) -> None:
     model.model.save_pretrained(f"models/{cfg.ft_models.name}_peft_{cfg.datasets.dataset}_{cfg.datasets.src_lan}_{cfg.datasets.trg_lan}/")
 
     print("Done with the fine-tuning!")
+    
+    if cfg.ft_experiments.train_and_test == False: #I do not want to test now
+        return
     
     print("Evaluation of the model...")
 

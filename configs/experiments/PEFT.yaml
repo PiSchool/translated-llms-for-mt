@@ -1,6 +1,10 @@
 # True is fine-tuning with LoRA, False to fine-tune without PEFT
 peft_mode : True 
 
+# True if you want to train and test, False just to train 
+# (this is not used if you are just testing,i.e. launching test_peft.py)
+train_and_test : False
+
 # Kind of prompt: possible alternatives A,B, or C (look ar mt2magic/prompter_bloom.py for more info):
 # - 'A': '{src_lan}: {src_sent}
 #         {trg_lan}:'
@@ -20,7 +24,7 @@ num_workers : 0
 # Training parameters
 max_length : 256
 lr : 3e-4
-num_epochs : 2
+num_epochs : 1
 batch_size : 16
 accumulate_grad_num : 4
 
@@ -28,13 +32,13 @@ accumulate_grad_num : 4
 # (stage 3 shards optimizer dtates, gradient, and model parameters) -> increase in distributed communication but better memory usage
 strategy : 3
 
+# True to use 8int() quantization, False otherwise
+quantization : True
 # Precision -> Double precision: 64, full precision: 32, 16bit mixed precision: 16
 # for more info check the documentation (https://lightning.ai/docs/pytorch/stable/common/trainer.html)
 # For usage on CPU, this parameter is not used and 32-true is the default option
 # If quantization is True, then this parameter will not be used
 precision : 16
-# True to use 8int() quantization, False otherwise
-quantization : True
 
 # LoRA parameters
 lora_alpha : 32

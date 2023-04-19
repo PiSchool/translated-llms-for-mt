@@ -57,19 +57,26 @@ Download the flores dataset by running:
 ```
 ./data/scripts/flores-101.sh
 ```
-Then download the Translated datasets, you can find the cleaned versions on [gDrive](https://drive.google.com/drive/u/4/folders/14E5dAKdK7pwitSqf6zh233YybA73MzvJ): download the files ```translated-it-en-cleaned.csv``` and ```translated-it-es-cleaned.csv``` and put them in ```translated-llms-for-mt```.  
-Download all the ```.pt``` files [here](https://drive.google.com/drive/u/4/folders/1qecmn7ySukT6CVZZl2CTPKeN1tq3AHkp) (sBert encodings used for fuzzy prompting) and put them in ```translated-llms-for-mt```.  
+Then download the Translated datasets, 
+- the cleaned (small) versions is in [gDrive](https://drive.google.com/drive/u/4/folders/14E5dAKdK7pwitSqf6zh233YybA73MzvJ). Download the files ```translated-it-en-cleaned.csv``` and ```translated-it-es-cleaned.csv``` and put them in ```translated-llms-for-mt```;
+- the cleaned (big) version is in [](). Download the two folders ```es__it``` and ```en__it``` and put them in ```translated-llms-for-mt```;
+- download all the ```.pt``` files [here](https://drive.google.com/drive/u/4/folders/1qecmn7ySukT6CVZZl2CTPKeN1tq3AHkp) (sBert encodings used for fuzzy prompting) and put them in ```translated-llms-for-mt```.
+-   
 Move all the files in the right directories with:  
 ```
 ./data/scripts/adjust_files.sh
 ```
-Now launch the two scripts for splitting and formatting the datasets with:
+Now launch the three scripts for splitting and formatting the datasets with:
 ```
 python3 -m data.scripts.flores_preprocess
 ```  
-and:  
+  
 ```
 python3 -m data.scripts.translated_split
+```  
+and:
+```
+python3 -m data.scripts.translated_big_split
 ```  
 You can now work with the scripts for evaluation!
 
