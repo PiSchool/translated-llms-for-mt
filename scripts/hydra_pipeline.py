@@ -13,19 +13,30 @@ If performing a test of the pipeline, set the flag "test" to true, so that the e
 process only the first 5 sentences of the dataset!
 """
 
-test=True
+test=False
 @hydra.main(version_base=None, config_path="../configs", config_name="config")
 def translate_pipeline(cfg: DictConfig) -> None:
     test_df = pd.read_csv(cfg.datasets.test, sep=cfg.datasets.sep, encoding=cfg.datasets.encoding)
     if test:
         test_df = test_df.head()
-    if cfg.experiments.model == "gpt":
+
+    if cfg.experiments.model == "modernMT":
+        mt_translator = modernMT_translator(api_key=cfg.experiments.key,
+                                            source_lang=cfg.datasets.src_lan,
+                                            target_lang=cfg.datasets.trg_lan)
+        mt_translator.translate(data=test_df)
+        test_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/{cfg.experiments.model}-' \
+                         f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}.csv'
+        aggr_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/{cfg.experiments.model}-' \
+                         f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}-aggregate.csv'
+
+    else:
         stop_seq = ['[target]', '[source]']
         gpt_param = {'temperature': 0.0, 'max_tokens': 256,'stop': stop_seq}
         prompt_config = prompter_cfg(cfg)
         gpt_translator = gpt3_translator(API_KEY=cfg.experiments.key,
                                          prompt_config=prompt_config,
-                                         model_name='davinci',
+                                         model_name=cfg.experiments.model,
                                         param=gpt_param)
         gpt_translator.translate(test_df, prompter_config=prompt_config)
         test_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/{cfg.experiments.model}-' \
@@ -35,15 +46,7 @@ def translate_pipeline(cfg: DictConfig) -> None:
                          f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}-' \
                          f'{cfg.experiments.strategy}-{cfg.experiments.n_shots}-aggregate.csv'
 
-    else:
-        mt_translator = modernMT_translator(api_key=cfg.experiments.key,
-                                            source_lang=cfg.datasets.src_lan,
-                                            target_lang=cfg.datasets.trg_lan)
-        mt_translator.translate(data=test_df)
-        test_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/{cfg.experiments.model}-' \
-                         f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}.csv'
-        aggr_save_path = f'./data/processed/metrics/{cfg.datasets.dataset}/{cfg.experiments.model}-' \
-                         f'{cfg.datasets.dataset}-{cfg.datasets.src_lan}-{cfg.datasets.trg_lan}-aggregate.csv'
+
     evaluator = Evaluator()
     evaluator.evaluating_from_dataframe(dataframe=test_df, save_path=test_save_path)
     aggregate_metrics_df = evaluator.calculating_corpus_metrics_from_dataframe(dataframe=test_df)
