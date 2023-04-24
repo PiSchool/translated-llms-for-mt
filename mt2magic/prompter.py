@@ -8,8 +8,6 @@ import torch
 random.seed(42)
 """
 Prompter for pure generative language models.
-The get_labeled_prompt method is a proxy, since the SVM + fuzzy pipeline
-doesn't work for now.
 """
 class Prompter:
     def __init__(self, config: PromptConfig):

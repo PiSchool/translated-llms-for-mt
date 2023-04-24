@@ -1,0 +1,4 @@
+model: gpt-3.5-turbo
+key: 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
+n_shots: 3
+strategy: fuzzy
