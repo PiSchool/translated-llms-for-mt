@@ -1,4 +1,0 @@
-model: gpt
-key: dummy_token_for_fine_tuning
-n_shots: 3
-strategy: fuzzy
