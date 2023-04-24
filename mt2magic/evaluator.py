@@ -264,11 +264,12 @@ class Evaluator:
             data_list.append(data)
 
         model_output = model.predict(data_list, batch_size=batch_size, gpus=gpu_numbers)
+        system_comet = model_output.system_score
 
         # You can comment this line if you don't have memory problems
-        del model
+        del model, data_list, data, model_output
 
-        return model_output.system_score
+        return system_comet
 
     def set_run_without_gpu(self, run_without_gpu):
         self.run_without_gpu = run_without_gpu

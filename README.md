@@ -77,10 +77,12 @@ You can now work with the scripts for evaluation!
 
 
 ## How to run
+You can test all the approaches on four datasets: flores from italian to english (flores_it_en), flores from italian to spanish (flores_it_es), translated from italian to english (translated_it_en), translated from italian to spanish (translated_it_es).  
+The inference pipeline exploits Hydra, so adding more experiments is as easy as writing a simple YAML file. 
+### ModernMT and GPT-3
 Experiments with gpt3 and ModernMT (read Additional data paragraph first!)  
-You can test ModernMT on four datasets: flores from italian to english (flores_it_en), flores from italian to spanish (flores_it_es), translated from italian to english (translated_it_en), translated from italian to spanish (translated_it_es).  
-The inference pipeline exploits Hydra, so adding more experiments is as easy as writing a simple YAML file.  
-To run ModernMT evaluation on these datasets, modify the sweeper inputs of ```./configs/config``` like this:
+
+To run ModernMT evaluation on the datasets, modify the sweeper inputs of ```./configs/config``` like this:
 ```
 defaults:
   - datasets: ???
@@ -116,6 +118,34 @@ hydra:
 ```
 Then launch the script with the same command as the one for modernMT. 
 
+### PEFT
+Experiments with LoRA on FlanT5 and BLOOM (read Additional data paragraph first!).
+There are two pipelines for the PEFT part of the challenge: one for fine-tuning and one for testing the fine-tuned models.
+To run the pipelines on all the datasets, using for examlpe FlanT5-small, modify the sweeper inputs of ```./configs/ft_config``` like this:
+```
+defaults:
+  - datasets: ???
+  - experiments: ???
+  - _self_
+hydra:
+  sweeper:
+    params:
+      datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
+      ft_models : t5_small
+      experiments: PEFT
+      keys : wandb
+```
+Then, to fine-tune the model, run on the command line: 
+```
+python3 scripts/hydra_peft_train -m
+```
+Instead, to test the model, run on the command line:
+```
+python3 scripts/hydra_peft_test -m
+```
+To run the pipelines on more than one model, pass a list of models' names to ft_models (similarly as in datasets).
+A list of available models (and relative names) is listed at the top of ```./configs/ft_config```.
+To configure the experiments, modify ```./configs/experiments/PEFT.yaml``` file.
 
 ## The team
 This challenge, sponsored by [S], was carried out by [X], [Y] and [Z] as part of the [N]th edition of Pi School's School of AI program.

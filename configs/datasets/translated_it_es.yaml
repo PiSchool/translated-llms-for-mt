@@ -1,4 +1,5 @@
 dataset: translated
+train: data/processed/translated/translated-it-es-train.csv
 test: data/processed/translated/translated-it-es-test.csv
 emb_src: data/processed/translated/translated-it-es-dev-embedding_it.pt
 dev: data/processed/translated/translated-it-es-dev.csv
@@ -6,3 +7,4 @@ src_lan: it
 trg_lan: es
 sep: ','
 encoding: utf-8
+prefix : "Translate from Italian to Spanish:"

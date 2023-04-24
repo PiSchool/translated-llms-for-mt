@@ -127,3 +127,23 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Dataset
+data/external/flores200_dataset/
+data/processed/
+data/raw/
+data/results/
+
+#Models
+models/
+
+#wandb
+wandb/
+translated-challenge/
+
+#hydra
+multirun/
+outputs/
+
+#keys
+configs/keys/
