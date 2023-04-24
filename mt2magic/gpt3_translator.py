@@ -5,7 +5,15 @@ import pandas as pd
 
 from mt2magic.formatting import PromptConfig, GPT3_Parameters
 from mt2magic.prompter import Prompter
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+)  # for exponential backoff
 
+@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+def completion_with_backoff(**kwargs):
+    return openai.ChatCompletion.create(**kwargs)
 
 class gpt3_translator:
 
@@ -33,7 +41,6 @@ class gpt3_translator:
         Translate sentences from the source to the target language; source
         and target language are specified by the prompt.
         To use custom parameters it's necessary to change self.parameters.
-        The use of the prompter is WIP.
         Args
             sentences (:obj:`list`): sentences in the source language to be translated.
         Returns
@@ -49,23 +56,39 @@ class gpt3_translator:
             else:
                 prompt = self.prompter.get_prompt(src_sent=sentences[idx])
             prompt_list.append(prompt)
-        data_batches = [prompt_list[i:i + batch_size] for i in range(0, len(prompt_list), batch_size)]
-        for batch in data_batches:
-            output = openai.Completion.create(model=self.model_name, prompt=batch,
-                                              # suffix=self.parameters['suffix'],
-                                              max_tokens=self.parameters['max_tokens'],
-                                              temperature=self.parameters['temperature'],
-                                              # top_p=self.parameters['top_p'],
-                                              # n=self.parameters['n'], stream=self.parameters['stream'],
-                                              # logprobs=self.parameters['logprobs'], echo=self.parameters['echo'],
-                                              stop=self.parameters['stop'],
-                                              # presence_penalty=self.parameters['presence_penalty'],
-                                              # frequency_penalty=self.parameters['frequency_penalty'],
-                                              # best_of=self.parameters['best_of'],
-                                              # logit_bias=self.parameters['logit_bias'], user=self.parameters['user']
-                                              )
-            for trans in output.choices:
-                translation_list.append(trans.text)
+        if self.model_name == 'gpt-3.5-turbo':
+            for prompt in prompt_list:
+                messages = [
+                    {"role": "user", "content": prompt}
+                ]
+                output = completion_with_backoff(
+                    model=self.model_name,
+                    messages=messages,
+                    max_tokens=self.parameters["max_tokens"],
+                    temperature=self.parameters["temperature"],
+                    stop=self.parameters['stop']
+                )
+                translation_list.append(output['choices'][0]['message']['content'])
+
+        else:
+            data_batches = [prompt_list[i:i + batch_size] for i in range(0, len(prompt_list), batch_size)]
+            for batch in data_batches:
+                output = openai.Completion.create(
+                    model=self.model_name, prompt=batch,
+                    # suffix=self.parameters['suffix'],
+                    max_tokens=self.parameters['max_tokens'],
+                    temperature=self.parameters['temperature'],
+                    # top_p=self.parameters['top_p'],
+                    # n=self.parameters['n'], stream=self.parameters['stream'],
+                    # logprobs=self.parameters['logprobs'], echo=self.parameters['echo'],
+                    stop=self.parameters['stop'],
+                    # presence_penalty=self.parameters['presence_penalty'],
+                    # frequency_penalty=self.parameters['frequency_penalty'],
+                    # best_of=self.parameters['best_of'],
+                    # logit_bias=self.parameters['logit_bias'], user=self.parameters['user']
+                )
+                for trans in output.choices:
+                    translation_list.append(trans.text)
 
         return translation_list
 

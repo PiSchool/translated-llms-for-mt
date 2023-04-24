@@ -5,5 +5,5 @@ defaults:
 hydra:
   sweeper:
     params:
-      datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
-      experiments: modernMT
+      datasets: translated_it_en,translated_it_es
+      experiments: turbo35_fuzzy_3ex, turbo35_random_3ex, turbo35_label_3ex
