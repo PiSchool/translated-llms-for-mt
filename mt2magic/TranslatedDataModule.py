@@ -1,4 +1,5 @@
 from mt2magic.PEFTDataset import PEFTDataset
+from mt2magic.prompter_bloom import BLOOM_prompt
 
 import torch
 from torch.utils.data import DataLoader
@@ -16,7 +17,10 @@ Args:
   max_length (int) : parameter used in the tokenizer to control le length of the padding and truncation
   batch_size (int) : dimension of the batch size
   num_workers (int) : if >1 that multi-process data loading is turned on 
-  prefix (str) : prefix added before the sentence that has to be translated ("Translate from language1 to language2:")
+  prefix_type (str) : determine the class of prompt used in the tests. More info in mt2magic/prompter_bloom.py
+  src_lan (str) : language of the source text
+  trg_lan (str) : language of the target text
+  limit (int) : limit the dimension of the train set
 """
 
 class TranslatedDataModule(LightningDataModule):
@@ -27,8 +31,11 @@ class TranslatedDataModule(LightningDataModule):
               tokenizer:str, 
               max_length:int=128, 
               batch_size:int=32, 
-              num_workers:int=1,
-              prefix:str="Translate from Italian to Spanish"
+              num_workers:int=0,
+              prefix_type:str="B",
+              src_lan:str="Italian",
+              trg_lan:str="English",
+              limit:int=0
               ):
     super().__init__()
 
@@ -40,16 +47,24 @@ class TranslatedDataModule(LightningDataModule):
     self.num_workers = num_workers
     self.max_length = max_length
     self.tokenizer = AutoTokenizer.from_pretrained(tokenizer, use_fast=True)
-    self.prefix = prefix
+    self.prefix_type = prefix_type
+    self.src_lan = src_lan
+    self.trg_lan = trg_lan
+    self.limit = limit
 
   def setup(self, stage:str=None):
-    train_data = pd.read_csv(self.train_file).iloc[:100]
-    val_data = pd.read_csv(self.val_file).iloc[:100]
-    test_data = pd.read_csv(self.test_file).iloc[:100]
+    if self.limit != 0:
+      train_data = pd.read_csv(self.train_file).iloc[:self.limit]
+      val_data = pd.read_csv(self.val_file).iloc[:self.limit]
+    else:
+      train_data = pd.read_csv(self.train_file)
+      val_data = pd.read_csv(self.val_file)
+
+    #test_data = pd.read_csv(self.test_file)
     
     self.X_train_enc, self.X_train_attention, self.Y_train_enc = self.preprocess_data(train_data)
     self.X_val_enc, self.X_val_attention, self.Y_val_enc = self.preprocess_data(val_data)
-    self.X_test_enc, self.X_test_attention, self.Y_test_enc = self.preprocess_data(test_data)
+    #self.X_test_enc, self.X_test_attention, self.Y_test_enc = self.preprocess_data(test_data)
 
   def train_dataloader(self):
     train_dataset = PEFTDataset(self.X_train_enc,self.X_train_attention, self.Y_train_enc)
@@ -77,7 +92,7 @@ class TranslatedDataModule(LightningDataModule):
     trg_input_ids = []
     for _, row in data.iterrows():
       src_encoding = self.tokenizer.batch_encode_plus(
-            [self.prefix+row["source"]], max_length=self.max_length,  padding="max_length", truncation=True
+            [BLOOM_prompt(type=self.prefix_type, sentence=row["source"], src_lan=self.src_lan, trg_lan=self.trg_lan)], max_length=self.max_length,  padding="max_length", truncation=True
         )
       trg_encoding = self.tokenizer.batch_encode_plus(
             [row["target"]], max_length=self.max_length,  padding="max_length", truncation=True

@@ -1,0 +1,10 @@
+dataset: translated_big
+train: data/processed/translated/translated-big-it-en-train.csv
+test: data/processed/translated/translated-big-it-en-test.csv
+dev: data/processed/translated/translated-big-it-en-dev.csv
+src_lan: it
+trg_lan: en
+sep: ','
+encoding: utf-8
+languageA : Italian
+languageB : English

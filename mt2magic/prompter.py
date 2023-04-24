@@ -116,7 +116,3 @@ class Prompter:
         for sent in prompt_sentences:
             output += sent
         return output + src_formatting
-
-
-
-

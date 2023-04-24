@@ -1,4 +1,4 @@
-# Available models:
+# Available models (use the name on the left):
 # t5_small -> google/flan-t5-small
 # t5_large -> google/flan-t5-large
 # t5_xl -> google/flan-t5-xl
@@ -12,8 +12,8 @@
 # Available datasets
 # translated_it_es
 # translated_it_en
-# flores_it_es
-# flores_it_en
+# translated_big_it_es
+# translated_big_it_en
 
 defaults:
   - datasets: ???
@@ -25,7 +25,7 @@ defaults:
 hydra:
   sweeper:
     params:
-      datasets : translated_it_en
-      ft_models : t5_small
+      datasets : translated_big_it_en
+      ft_models : bloom_small
       experiments : PEFT
       keys : wandb # config file with the key to login in W&B 

@@ -57,19 +57,26 @@ Download the flores dataset by running:
 ```
 ./data/scripts/flores-101.sh
 ```
-Then download the Translated datasets, you can find the cleaned versions on [gDrive](https://drive.google.com/drive/u/4/folders/14E5dAKdK7pwitSqf6zh233YybA73MzvJ): download the files ```translated-it-en-cleaned.csv``` and ```translated-it-es-cleaned.csv``` and put them in ```translated-llms-for-mt```.  
-Download all the ```.pt``` files [here](https://drive.google.com/drive/u/4/folders/1qecmn7ySukT6CVZZl2CTPKeN1tq3AHkp) (sBert encodings used for fuzzy prompting) and put them in ```translated-llms-for-mt```.  
+Then download the Translated datasets, 
+- the cleaned (small) versions is in [gDrive](https://drive.google.com/drive/u/4/folders/14E5dAKdK7pwitSqf6zh233YybA73MzvJ). Download the files ```translated-it-en-cleaned.csv``` and ```translated-it-es-cleaned.csv``` and put them in ```translated-llms-for-mt```;
+- the cleaned (big) version is in [](). Download the two folders ```es__it``` and ```en__it``` and put them in ```translated-llms-for-mt```;
+- download all the ```.pt``` files [here](https://drive.google.com/drive/u/4/folders/1qecmn7ySukT6CVZZl2CTPKeN1tq3AHkp) (sBert encodings used for fuzzy prompting) and put them in ```translated-llms-for-mt```.
+-   
 Move all the files in the right directories with:  
 ```
 ./data/scripts/adjust_files.sh
 ```
-Now launch the two scripts for splitting and formatting the datasets with:
+Now launch the three scripts for splitting and formatting the datasets with:
 ```
 python3 -m data.scripts.flores_preprocess
 ```  
-and:  
+  
 ```
 python3 -m data.scripts.translated_split
+```  
+and:
+```
+python3 -m data.scripts.translated_big_split
 ```  
 You can now work with the scripts for evaluation!
 
@@ -120,8 +127,8 @@ Then launch the script with the same command as the one for modernMT.
 
 ### PEFT
 Experiments with LoRA on FlanT5 and BLOOM (read Additional data paragraph first!).
-There are two pipelines for the PEFT part of the challenge: one for fine-tuning and one for testing the fine-tuned models.
-To run the pipelines on all the datasets, using for examlpe FlanT5-small, modify the sweeper inputs of ```./configs/ft_config``` like this:
+There are two pipelines for the PEFT part of the challenge: one for fine-tuning and testing and one just for testing a fine-tuned models.
+To run the pipelines on all the datasets, using for examlpe FlanT5-small, modify the sweeper inputs of ```./configs/ft_config.yaml``` like this (the pipelines works just on Translated datasets, since we are not going to fine-tune of Flores dataset anymore):
 ```
 defaults:
   - datasets: ???
@@ -130,22 +137,31 @@ defaults:
 hydra:
   sweeper:
     params:
-      datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
+      datasets: translated_it_en,translated_it_es
       ft_models : t5_small
       experiments: PEFT
       keys : wandb
 ```
-Then, to fine-tune the model, run on the command line: 
+In ```./configs/experiments/PEFT.yaml``` you can configure the parameters to train and test the models. Using this config file we can control:
+- the hyperparameters of  the fine-tunings;
+- the parameters of the generation of the translations;
+- where to store the weights of the fine-tuned model;
+- whether to apply quantization, precision, and LoRA;
+- which deepspeed approach to use;
+- which prompting technique to use;
+- the dimension of the subset of the train/test set we want to use (if we do not want to use the whole set)
+
+In ```./configs/keys/wandb.yaml``` is stored the API token to save the results in Weights & Biases (it is asked to input such key the first time you lunched the script).
+Then, to fine-tune and test the model, use the pipeline by running on the command line: 
 ```
-python3 scripts/hydra_peft_train -m
+python3 scripts/peft_pipeline.py -m
 ```
-Instead, to test the model, run on the command line:
+Instead, to just test the model, run on the command line:
 ```
-python3 scripts/hydra_peft_test -m
+python3 scripts/test_peft.py -m
 ```
 To run the pipelines on more than one model, pass a list of models' names to ft_models (similarly as in datasets).
-A list of available models (and relative names) is listed at the top of ```./configs/ft_config```.
-To configure the experiments, modify ```./configs/experiments/PEFT.yaml``` file.
+A list of available models (and relative names) is listed at the top of ```./configs/ft_config.yaml```.
 
 ## The team
 This challenge, sponsored by [S], was carried out by [X], [Y] and [Z] as part of the [N]th edition of Pi School's School of AI program.
