@@ -5,5 +5,5 @@ defaults:
 hydra:
   sweeper:
     params:
-      datasets: translated_it_en,translated_it_es
-      experiments: turbo35_fuzzy_3ex, turbo35_random_3ex, turbo35_label_3ex
+      datasets: translated_it_es
+      experiments: davinci35_fuzzy_3ex,davinci35_random_3ex
