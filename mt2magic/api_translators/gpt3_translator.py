@@ -4,6 +4,9 @@ import pandas as pd
 from mt2magic.utils.formatting import PromptConfig, GPT3_Parameters
 from mt2magic.utils.prompter import Prompter
 
+"""
+This class is used for calling openAI API for doing translations
+"""
 class gpt3_translator:
 
     def __init__(self, API_KEY: str, prompt_config: PromptConfig, model_name: str = 'davinci',
