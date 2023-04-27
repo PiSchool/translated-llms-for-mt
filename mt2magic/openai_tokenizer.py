@@ -62,6 +62,11 @@ class openaiTokenizer:
         return cost
 
     def finetuned_translation_cost(self, sources: List[str], prompts: List[str]) -> float:
+        """
+        This method is used for getting the translation costs using a fine-tuned gpt-3.
+        The assumption is that the translated sentences have the same length of the source
+        sentences.
+        """
         return self.translation_cost(sources, prompts, 'davinci') * 6
 
 

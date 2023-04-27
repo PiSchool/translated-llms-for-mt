@@ -1,24 +1,13 @@
 import openai
 from typing import List, Optional
-
 import pandas as pd
-
 from mt2magic.formatting import PromptConfig, GPT3_Parameters
 from mt2magic.prompter import Prompter
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_random_exponential,
-)  # for exponential backoff
-
-@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
-def completion_with_backoff(**kwargs):
-    return openai.ChatCompletion.create(**kwargs)
 
 class gpt3_translator:
 
-    def __init__(self, API_KEY: str, prompt_config: PromptConfig, model_name: str = 'davinci'
-                 , param: GPT3_Parameters = None) -> None:
+    def __init__(self, API_KEY: str, prompt_config: PromptConfig, model_name: str = 'davinci',
+                 param: GPT3_Parameters = None) -> None:
         self.api_key = API_KEY
         self.model_name = model_name
         self.prompter = Prompter(prompt_config)
@@ -61,7 +50,7 @@ class gpt3_translator:
                 messages = [
                     {"role": "user", "content": prompt}
                 ]
-                output = completion_with_backoff(
+                output = openai.ChatCompletion.create(
                     model=self.model_name,
                     messages=messages,
                     max_tokens=self.parameters["max_tokens"],
@@ -75,17 +64,9 @@ class gpt3_translator:
             for batch in data_batches:
                 output = openai.Completion.create(
                     model=self.model_name, prompt=batch,
-                    # suffix=self.parameters['suffix'],
                     max_tokens=self.parameters['max_tokens'],
                     temperature=self.parameters['temperature'],
-                    # top_p=self.parameters['top_p'],
-                    # n=self.parameters['n'], stream=self.parameters['stream'],
-                    # logprobs=self.parameters['logprobs'], echo=self.parameters['echo'],
                     stop=self.parameters['stop'],
-                    # presence_penalty=self.parameters['presence_penalty'],
-                    # frequency_penalty=self.parameters['frequency_penalty'],
-                    # best_of=self.parameters['best_of'],
-                    # logit_bias=self.parameters['logit_bias'], user=self.parameters['user']
                 )
                 for trans in output.choices:
                     translation_list.append(trans.text)

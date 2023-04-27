@@ -1,5 +1,4 @@
 from typing import TypedDict, List, Optional, Union
-import pandas as pd
 
 """
 File that contains structures of the types we're using.
@@ -57,20 +56,10 @@ class GPT3_Parameters(TypedDict):
         For complete documentation:
         https://platform.openai.com/docs/api-reference/completions/create
     """
-    #suffix: str
     max_tokens: int
     temperature: float
-    #top_p: float
-    #n: int
-    #stream: bool
-    #logprobs: int
-    #echo: bool
     stop: Union[str, List]
-    #presence_penalty: float
-    #frequency_penalty: float
-    #best_of: int
-    #logit_bias: dict
-    #user: str
+
 
 
 class PromptConfig(TypedDict):

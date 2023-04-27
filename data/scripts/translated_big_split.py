@@ -1,10 +1,8 @@
 from mt2magic.dataset_utils import get_df_from_txt
-
-import pandas as pd
 from sklearn.model_selection import train_test_split
 
 """
-Set the parameters to split cleaned translated datasets in train-dev-test.
+Set the parameters to split cleaned translated (big) datasets in train-dev-test.
 """
 
 

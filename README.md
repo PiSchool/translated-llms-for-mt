@@ -32,6 +32,8 @@ Update appropriately before handing over this repository. You may want to add ot
 │                         that `your_package_name` can be imported
 └── mt2magic  <- Source code for use in this project
     ├── __init__.py    <- (Optional) Makes `your_package_name` a Python module
+    ├── outdated       <- Folder that contains baseline classes implemented during the                      
+    │                     first week.
     └── *.py           <- Other Python source files (can also be organized in 
                           one or more subdirectories)
 ```

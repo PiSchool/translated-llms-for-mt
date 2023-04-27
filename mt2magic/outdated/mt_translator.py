@@ -1,28 +1,34 @@
-from mt2magic.translator import Translator
+from mt2magic.outdated.translator import Translator
 from typing import List
 import pandas as pd
 
-
-class t2tTranslator(Translator):
+"""
+Machine Translation specialized class (Helsinki-NLP based for now). 
+"""
+class mtTranslator(Translator):
     def __init__(self, API_TOKEN: str, API_URL: str):
         super().__init__(API_TOKEN=API_TOKEN, API_URL=API_URL)
-        self.src_lan = None
-        self.trg_lan = None
+        self.src = 'it'
+        self.trg = 'en'
 
     def _set_lan(self, src: str, trg: str):
         """
-        Updates the inputs language and the target language for translation.
+        Updates the inputs language and the target language for translation
+        by updating the model used for inference
+        (complete list of models available: https://huggingface.co/Helsinki-NLP)
         Args
-            src (:obj:`str`): source language (i.e. Italian, Iranian, Spanish...)
+            src (:obj:`str`): source language (i.e. it, en, es...)
             trg (:obj:`str`): target language
         """
-        self.src_lan = src
-        self.trg_lan = trg
+        self.src = src
+        self.trg = trg
+        self.API_URL = "https://api-inference.huggingface.co/models/" \
+                        + f"Helsinki-NLP/opus-mt-{self.src}-{self.trg}"
 
     def translate_sentences(self, sentences: List[str]) -> List[str]:
         """
         Translate sentences from the source to the target language; source
-        and target language are specified by self.src_lan and self.trg_lan.
+        and target language are specified by the model used.
         Args
             sentences (:obj:`list`): sentences in the source language to be translated.
         Returns
@@ -30,11 +36,8 @@ class t2tTranslator(Translator):
         """
         translations = []
         for sent in sentences:
-            translation = self.query(
-                {"inputs": f"translate {self.src_lan} to {self.trg_lan}: " + sent,
-                "wait_for_model": True
-                 }
-            )[0]["translation_text"]
+            translation = self.query({"inputs": sent, "wait_for_model": True
+                                      })[0]["translation_text"]
             translations.append(translation)
         return translations
 
@@ -45,8 +48,8 @@ class t2tTranslator(Translator):
         Args
             data (:obj:`pd.DataFrame`): formatting as specified in
                                         mt2magic.formatting.TranslationData
-            src_lan (:obj:`str`): language of the source sentences (Italian, Iranian, English...)
-            trg_lan (:obj:`str`): target language for translation (Spanish, Greek, Dutch...)
+            src_lan (:obj:`str`): language of the source sentences.
+            trg_lan (:obj:`str`): target language for translation.
         Returns
             :obj:`pd.DataFrame`: df with same formatting as the input, containing the "translation"
                                  column filled.
@@ -55,5 +58,6 @@ class t2tTranslator(Translator):
         self._set_lan(src=src_lan, trg=trg_lan)
         data["translation"] = self.translate_sentences(source_sentences)
         return data
+
 
 

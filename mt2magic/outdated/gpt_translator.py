@@ -1,4 +1,4 @@
-from mt2magic.translator import Translator
+from mt2magic.outdated.translator import Translator
 from typing import List
 from mt2magic.formatting import Parameters, PromptConfig
 import pandas as pd
