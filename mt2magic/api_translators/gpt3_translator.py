@@ -1,8 +1,8 @@
 import openai
 from typing import List, Optional
 import pandas as pd
-from mt2magic.formatting import PromptConfig, GPT3_Parameters
-from mt2magic.prompter import Prompter
+from mt2magic.utils.formatting import PromptConfig, GPT3_Parameters
+from mt2magic.utils.prompter import Prompter
 
 class gpt3_translator:
 

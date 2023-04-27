@@ -5,12 +5,10 @@ In this work, we address the main problems that arise when using LLMs: the diffi
 In this repository you will find several pipelines that aim to simplify testing of different models, prompting techniques, and efficient fine-tuning approaches.
 
 ## Directory structure
-Update appropriately before handing over this repository. You may want to add other directories/files or remove those you don't need.
 
 ```
 ├── data
-│   ├── external       <- Data from third party sources
-│   ├── interim        <- Intermediate data that has been transformed
+│   ├── external       <- Data from third party sources     
 │   ├── processed      <- The final, canonical data sets for modeling
 │   ├── raw            <- The original, immutable data dump
 │   └── scripts        <- Scripts to download or generate data
@@ -20,8 +18,6 @@ Update appropriately before handing over this repository. You may want to add ot
 ├── notebooks          <- Jupyter notebooks. Naming convention is a date (for 
 │                         ordering) and a short `_` delimited description, 
 │                         e.g. `2022-05-18_initial_data_exploration.ipynb`.
-├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc
-│   └── figures        <- Generated graphics and figures
 │
 ├── requirements.txt   <- Required packages (dependencies), e.g. generated 
 │                         with `pip freeze > requirements.txt`
@@ -31,11 +27,20 @@ Update appropriately before handing over this repository. You may want to add ot
 ├── setup.py           <- makes project pip installable (pip install -e .) so 
 │                         that `your_package_name` can be imported
 └── mt2magic  <- Source code for use in this project
-    ├── __init__.py    <- (Optional) Makes `your_package_name` a Python module
-    ├── outdated       <- Folder that contains baseline classes implemented during the                      
-    │                     first week.
-    └── *.py           <- Other Python source files (can also be organized in 
-                          one or more subdirectories)
+    ├── __init__.py      <- (Optional) Makes `your_package_name` a Python module
+    │
+    ├── api_translators  <- Classes to perform translation with openAI models and modernMT
+    │
+    ├── evaluate         <- Classes to compute BLEU, ChrF and COMET scores 
+    │
+    ├── fine-tuning      <- Classes for fine-tuning BLOOM and FlanT5
+    │
+    ├── outdated         <- Folder that contains baseline classes implemented during the                      
+    │                       first week.
+    ├── utils            <- Helper functions and Prompter  
+    │
+    └── *.py             <- Other Python source files (can also be organized in 
+                            one or more subdirectories)
 ```
 
 ## How to install

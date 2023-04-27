@@ -1,4 +1,4 @@
-from mt2magic.formatting import PromptConfig
+from mt2magic.utils.formatting import PromptConfig
 from omegaconf import DictConfig
 def prompter_cfg(cfg: DictConfig) -> PromptConfig:
     prompt_config = {'n_shots': cfg.experiments.n_shots,

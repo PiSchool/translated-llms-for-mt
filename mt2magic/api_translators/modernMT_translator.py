@@ -1,7 +1,7 @@
 import pandas as pd
 from modernmt import ModernMT
 
-from mt2magic.formatting import ModernMT_Parameters
+from mt2magic.utils.formatting import ModernMT_Parameters
 
 
 class modernMT_translator(object):

@@ -1,8 +1,8 @@
 import pandas as pd
-from mt2magic.gpt3_translator import gpt3_translator
-from mt2magic.modernMT_translator import modernMT_translator
-from mt2magic.evaluator import Evaluator
-from mt2magic.make_cfg import prompter_cfg
+from mt2magic.api_translators.gpt3_translator import gpt3_translator
+from mt2magic.api_translators.modernMT_translator import modernMT_translator
+from mt2magic.evaluate.evaluator import Evaluator
+from mt2magic.utils.make_cfg import prompter_cfg
 from omegaconf import DictConfig
 import hydra
 

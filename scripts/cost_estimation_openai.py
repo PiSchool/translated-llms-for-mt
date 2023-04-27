@@ -1,6 +1,6 @@
-from mt2magic.prompter import Prompter
-from mt2magic.openai_tokenizer import openaiTokenizer
-from mt2magic.make_cfg import prompter_cfg
+from mt2magic.utils.prompter import Prompter
+from mt2magic.utils.openai_tokenizer import openaiTokenizer
+from mt2magic.utils.make_cfg import prompter_cfg
 import pandas as pd
 from omegaconf import DictConfig
 import hydra

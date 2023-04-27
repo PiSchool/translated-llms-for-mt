@@ -1,8 +1,8 @@
-from mt2magic.TestPEFTDataset import TestPEFTDataset
+from mt2magic.peft.TestPEFTDataset import TestPEFTDataset
 #from mt2magic.FloresDataModule import FloresDataModule
-from mt2magic.TranslatedDataModule import TranslatedDataModule
-from mt2magic.PEFT_fine_tuner import PEFTModel
-from mt2magic.evaluator import Evaluator
+from mt2magic.peft.TranslatedDataModule import TranslatedDataModule
+from mt2magic.peft.PEFT_fine_tuner import PEFTModel
+from mt2magic.evaluate.evaluator import Evaluator
 
 import pandas as pd
 import lightning as L
@@ -111,14 +111,6 @@ def fine_tuning(cfg: DictConfig) -> None:
                                 trg_lan=cfg.datasets.languageB,
                                 limit=cfg.experiments.limit_train
                                 )
-    # elif cfg.datasets.dataset == "flores":
-    #     dm = FloresDataModule(dev_path=cfg.datasets.dev,
-    #                     devtest_path=cfg.datasets.test,
-    #                     tokenizer=cfg.ft_models.full_name, 
-    #                     batch_size=cfg.experiments.batch_size,
-    #                     max_length=cfg.experiments.max_length, 
-    #                     prefix=cfg.datasets.prefix
-    #                     )
     else:
         raise Exception("The selected dataset is not valid! Use Translated datasets")
     

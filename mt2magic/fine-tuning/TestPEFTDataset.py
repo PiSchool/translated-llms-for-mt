@@ -1,4 +1,4 @@
-from mt2magic.prompter_bloom import BLOOM_prompt
+from mt2magic.utils.prompter import Prompter
 
 from torch.utils.data import Dataset
 import pandas as pd
@@ -23,7 +23,7 @@ class TestPEFTDataset(Dataset):
         return len(self.test_data)
 
     def __getitem__(self, idx):
-        text = BLOOM_prompt(type=self.prompt_type, 
+        text = Prompter.BLOOM_prompt(type=self.prompt_type,
                             sentence=self.test_data["source"].iloc[idx], 
                             src_lan=self.src_lan, 
                             trg_lan=self.trg_lan

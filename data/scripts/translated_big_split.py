@@ -1,4 +1,4 @@
-from mt2magic.dataset_utils import get_df_from_txt
+from mt2magic.utils.dataset_utils import get_df_from_txt
 from sklearn.model_selection import train_test_split
 
 """

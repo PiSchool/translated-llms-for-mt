@@ -2,11 +2,8 @@ from typing import List
 import tiktoken
 
 """
-This class is used for mainly 2 things: 
-1) Get an estimation of costs of fine-tuning and inference on different datasets, 
-   using scripts/cost_estimation_openai.py
-2) Spot the sentences that are too long to be handled by the context-length of 
-   openai models.   
+This class is used for getting an estimation of costs of fine-tuning and inference 
+on different datasets, using scripts/cost_estimation_openai.py 
 """
 class openaiTokenizer:
     def __init__(self):

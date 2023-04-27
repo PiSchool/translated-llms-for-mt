@@ -1,6 +1,6 @@
 import pandas as pd
-from mt2magic.dataset_utils import get_pool_from_txt
-from mt2magic.dataset_utils import get_df_from_txt
+from mt2magic.utils.dataset_utils import get_pool_from_txt
+from mt2magic.utils.dataset_utils import get_df_from_txt
 
 """
 Set src languages and trg languages to build prompter_df ("pool" value for PrompterConfig)

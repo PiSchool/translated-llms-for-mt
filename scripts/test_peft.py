@@ -1,5 +1,5 @@
-from mt2magic.evaluator import Evaluator
-from mt2magic.TestPEFTDataset import TestPEFTDataset
+from mt2magic.evaluate.evaluator import Evaluator
+from mt2magic.peft.TestPEFTDataset import TestPEFTDataset
 
 import torch
 from peft import PeftModel, PeftConfig
