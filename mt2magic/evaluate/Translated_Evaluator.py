@@ -2,7 +2,9 @@ import pandas as pd
 import requests
 from time import sleep
 
-
+"""
+This class is used for computing COMET score with Translated API.
+"""
 class Translated_Evaluator:
 
     def evaluating_from_dataframe(self, dataframe, src_lang, tgt_lang, gpus=1) -> dict:

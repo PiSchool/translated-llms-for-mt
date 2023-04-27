@@ -10,7 +10,9 @@ from nltk.tokenize import word_tokenize
 nltk.download('punkt')
 logging.disable(logging.CRITICAL)
 
-
+"""
+This class is used for evaluating translations. We've implemented BLEU, ChrF, and COMET scores in this class.
+"""
 class Evaluator:
 
     def __init__(self, model_name='Unbabel/wmt22-comet-da', run_without_gpu=False):

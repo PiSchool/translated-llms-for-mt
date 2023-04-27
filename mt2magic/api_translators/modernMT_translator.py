@@ -3,7 +3,9 @@ from modernmt import ModernMT
 
 from mt2magic.utils.formatting import ModernMT_Parameters
 
-
+"""
+This class is used for calling modernMT API (from Translated) for doing translations
+"""
 class modernMT_translator(object):
     def __init__(self, api_key, source_lang, target_lang, platform=None, platform_version=None
                  , param: ModernMT_Parameters = None) -> None:
