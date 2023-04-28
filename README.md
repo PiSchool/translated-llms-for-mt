@@ -194,6 +194,17 @@ python3 scripts/test_peft.py -m
 To run the pipelines on more than one model, pass a list of models' names to ft_models (similarly as in datasets).
 A list of available models (and relative names) is listed at the top of ```./configs/ft_config.yaml```.
 
+### Evaluation metrics
+BLEU, ChrF, and COMET scores have been implemented for evaluating translations. There are two scripts for evaluation:
+1) `evaluator.py`
+
+    This script is for calculating BLEU2, BLEU3, BLEU4, ChrF, and COMET with your local computer (You can also skip calculating COMET if you don't have GPU).
+
+
+2) `Translated_evaluator.py`
+
+    We have implemented another script for calculating evaluation metrics because calculating the COMET score needs GPUs to complete and it's impossible to compute it with CPUs for a big set of translations. In the second script, evaluation metrics will be calculated by calling Translated API which will be much easier to compute the metrics, especially COMET.
+
 ## Drive and Jupyter notebooks
 The cleaned Translated small dataset that you can find on the [drive folder](https://drive.google.com/drive/folders/17ZjhKB7SOU7zIb1SBZnjrBnevoU37F4-) of the challenge
 is obtained with `./notebooks/2023_03_23_translated_data_cleaning.ipynb`. The embeddings for the development sets (used in the prompting pipeline) of all the datasets are obtained with `./notebooks/2023_03_27_Embeddings.ipynb`.
@@ -203,7 +214,7 @@ You can download the output of these notebooks by following th instructions in t
 This challenge, sponsored by Translated, was carried out by Marco Da Mommio, Mahdi Molaei and Gianfranco Romani as part of the 12th edition of Pi School's School of AI program.
 | Marco Da Mommio  | Mahdi Molaei | Gianfranco Romani |
 | ------------- | ------------- | ------------- |
-| <img src="https://user-images.githubusercontent.com/49344669/234525512-97c1e8fa-872a-45d0-b9cb-4107318b03ed.jpeg" width=1500> | <img src="https://user-images.githubusercontent.com/49344669/234887218-d961fcee-7fd0-49e2-97a6-64590949094c.jpg" width=1500> | <img src="https://user-images.githubusercontent.com/49344669/234525499-1406baa8-8f4f-4714-892d-d2e89f68affe.jpeg" width=1500>
+| <img src="https://user-images.githubusercontent.com/49344669/234525512-97c1e8fa-872a-45d0-b9cb-4107318b03ed.jpeg" width=1500> | <img src="https://user-images.githubusercontent.com/49344669/234887218-d961fcee-7fd0-49e2-97a6-64590949094c.jpg" heigth=700 width=1400> | <img src="https://user-images.githubusercontent.com/49344669/234525499-1406baa8-8f4f-4714-892d-d2e89f68affe.jpeg" width=1500>
 | <img src="https://camo.githubusercontent.com/b079fe922f00c4b86f1b724fbc2e8141c468794ce8adbc9b7456e5e1ad09c622/68747470733a2f2f6564656e742e6769746875622e696f2f537570657254696e7949636f6e732f696d616765732f7376672f6769746875622e737667" width="20"> [Momonez](https://github.com/Momonez)<br/> <img src="https://camo.githubusercontent.com/c8a9c5b414cd812ad6a97a46c29af67239ddaeae08c41724ff7d945fb4c047e5/68747470733a2f2f6564656e742e6769746875622e696f2f537570657254696e7949636f6e732f696d616765732f7376672f6c696e6b6564696e2e737667" width="20"> [LinkedIn](https://www.linkedin.com/in/marco-da-mommio-49a870209/)<br/>  | <img src="https://camo.githubusercontent.com/b079fe922f00c4b86f1b724fbc2e8141c468794ce8adbc9b7456e5e1ad09c622/68747470733a2f2f6564656e742e6769746875622e696f2f537570657254696e7949636f6e732f696d616765732f7376672f6769746875622e737667" width="20"> [m-molaei](https://github.com/m-molaei)<br/> <img src="https://camo.githubusercontent.com/c8a9c5b414cd812ad6a97a46c29af67239ddaeae08c41724ff7d945fb4c047e5/68747470733a2f2f6564656e742e6769746875622e696f2f537570657254696e7949636f6e732f696d616765732f7376672f6c696e6b6564696e2e737667" width="20"> [LinkedIn](https://www.linkedin.com/in/m-molaei/)<br/> <img src="https://camo.githubusercontent.com/35b0b8bfbd8840f35607fb56ad0a139047fd5d6e09ceb060c5c6f0a5abd1044c/68747470733a2f2f6564656e742e6769746875622e696f2f537570657254696e7949636f6e732f696d616765732f7376672f747769747465722e737667" width="20"> [@m_molaei75](https://twitter.com/m_molaei75) | <img src="https://camo.githubusercontent.com/b079fe922f00c4b86f1b724fbc2e8141c468794ce8adbc9b7456e5e1ad09c622/68747470733a2f2f6564656e742e6769746875622e696f2f537570657254696e7949636f6e732f696d616765732f7376672f6769746875622e737667" width="20"> [GianRomani](https://github.com/GianRomani)<br/> <img src="https://camo.githubusercontent.com/c8a9c5b414cd812ad6a97a46c29af67239ddaeae08c41724ff7d945fb4c047e5/68747470733a2f2f6564656e742e6769746875622e696f2f537570657254696e7949636f6e732f696d616765732f7376672f6c696e6b6564696e2e737667" width="20"> [LinkedIn](https://www.linkedin.com/in/gian-romani/)<br/> <img src="https://camo.githubusercontent.com/35b0b8bfbd8840f35607fb56ad0a139047fd5d6e09ceb060c5c6f0a5abd1044c/68747470733a2f2f6564656e742e6769746875622e696f2f537570657254696e7949636f6e732f696d616765732f7376672f747769747465722e737667" width="20"> [@gianfree97](https://twitter.com/gianfree97) |
 
 Special thanks to our Coach: Francesco Cariaggi ([anferico](https://github.com/anferico))
