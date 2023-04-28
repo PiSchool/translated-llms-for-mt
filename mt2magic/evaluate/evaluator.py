@@ -17,9 +17,17 @@ class Evaluator:
 
     def __init__(self, model_name='Unbabel/wmt22-comet-da', run_without_gpu=False):
 
-        self.COMET_model_path = download_model(model_name, saving_directory='./models/')
         self.COMET_sytem_score = None
         self.run_without_gpu = run_without_gpu
+
+        if torch.cuda.is_available():
+            self.COMET_model_path = download_model(model_name, saving_directory='./models/')
+        else:
+            if self.run_without_gpu:
+                self.COMET_model_path = download_model(model_name, saving_directory='./models/')
+            else:
+                print('Skipping COMET score model downloading due to the absence of GPU ...'
+                      '\nIf you want to download it with CPU then set run_without_gpu=True')
 
     def calculate_sentence_bleu(self, dataframe: pd.DataFrame):
         """
