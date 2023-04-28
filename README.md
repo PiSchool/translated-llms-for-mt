@@ -7,40 +7,60 @@ In this repository you will find several pipelines that aim to simplify testing 
 ## Directory structure
 
 ```
+│
+├── configs               <- Hydra configurations for launching the experiments
+│
 ├── data
-│   ├── external       <- Data from third party sources     
-│   ├── processed      <- The final, canonical data sets for modeling
-│   ├── raw            <- The original, immutable data dump
-│   └── scripts        <- Scripts to download or generate data
+│   ├── external          <- Data from third party sources     
+│   ├── processed         <- The final, canonical data sets for modeling
+│   ├── raw               <- The original, immutable data dump
+│   └── scripts           <- Scripts to download or generate data
 │
-├── models             <- Trained and serialized models
+├── models                <- Trained and serialized models
 │
-├── notebooks          <- Jupyter notebooks. Naming convention is a date (for 
-│                         ordering) and a short `_` delimited description, 
-│                         e.g. `2022-05-18_initial_data_exploration.ipynb`.
+├── mt2magic  <- Source code for use in this project
+│    │
+│    ├── __init__.py      <- (Optional) Makes `your_package_name` a Python module
+│    │
+│    ├── api_translators  <- Classes to perform translation with openAI models and modernMT
+│    │
+│    ├── evaluate         <- Classes to compute BLEU, ChrF and COMET scores 
+│    │
+│    ├── fine-tuning      <- Classes for fine-tuning BLOOM and FlanT5
+│    │
+│    ├── outdated         <- Folder that contains baseline classes implemented during the                      
+│    │                       first week.
+│    ├── utils            <- Helper functions and Prompter  
+│    │
+│    └── *.py             <- Other Python source files (can also be organized in one or more subdirectories)
 │
-├── requirements.txt   <- Required packages (dependencies), e.g. generated 
-│                         with `pip freeze > requirements.txt`
+├── notebooks             <- Jupyter notebooks. Naming convention is a date (for 
+│                            ordering) and a short `_` delimited description, 
+│                            e.g. `2022-05-18_initial_data_exploration.ipynb`.
 │
-├── scripts            <- Scripts to train a model, make predictions and so on
+├── requirements.txt      <- Required packages (dependencies), e.g. generated 
+│                            with `pip freeze > requirements.txt`
 │
-├── setup.py           <- makes project pip installable (pip install -e .) so 
-│                         that `your_package_name` can be imported
-└── mt2magic  <- Source code for use in this project
-    ├── __init__.py      <- (Optional) Makes `your_package_name` a Python module
+├── scripts               <- Scripts to train a model, make predictions and so on
+│
+├── setup.py              <- makes project pip installable (pip install -e .) so 
+│                            that `your_package_name` can be imported
+└── mt2magic              <- Source code for use in this project
     │
-    ├── api_translators  <- Classes to perform translation with openAI models and modernMT
+    ├── __init__.py       <- (Optional) Makes `your_package_name` a Python module
     │
-    ├── evaluate         <- Classes to compute BLEU, ChrF and COMET scores 
+    ├── api_translators   <- Classes to perform translation with openAI models and modernMT
     │
-    ├── fine-tuning      <- Classes for fine-tuning BLOOM and FlanT5
+    ├── evaluate          <- Classes to compute BLEU, ChrF and COMET scores 
     │
-    ├── outdated         <- Folder that contains baseline classes implemented during the                      
-    │                       first week.
-    ├── utils            <- Helper functions and Prompter  
+    ├── fine-tuning       <- Classes for fine-tuning BLOOM and FlanT5
     │
-    └── *.py             <- Other Python source files (can also be organized in 
-                            one or more subdirectories)
+    ├── outdated          <- Folder that contains baseline classes implemented during the                      
+    │                        first week.
+    ├── utils             <- Helper functions and Prompter  
+    │
+    └── *.py              <- Other Python source files (can also be organized in 
+                             one or more subdirectories)
 ```
 
 ## How to install
@@ -70,8 +90,8 @@ Download the flores dataset by running:
 Then download the Translated datasets, 
 - the cleaned (small) versions is in [gDrive](https://drive.google.com/drive/u/4/folders/14E5dAKdK7pwitSqf6zh233YybA73MzvJ). Download the files ```translated-it-en-cleaned.csv``` and ```translated-it-es-cleaned.csv``` and put them in ```translated-llms-for-mt```;
 - the cleaned (big) version is in [](). Download the two folders ```es__it``` and ```en__it``` and put them in ```translated-llms-for-mt```;
-- download all the ```.pt``` files [here](https://drive.google.com/drive/u/4/folders/1qecmn7ySukT6CVZZl2CTPKeN1tq3AHkp) (sBert encodings used for fuzzy prompting) and put them in ```translated-llms-for-mt```.
--   
+- download all the ```.pt``` files [here](https://drive.google.com/drive/u/4/folders/1qecmn7ySukT6CVZZl2CTPKeN1tq3AHkp) (sBert encodings used for fuzzy prompting) and put them in ```translated-llms-for-mt```.  
+
 Move all the files in the right directories with:  
 ```
 ./data/scripts/adjust_files.sh
@@ -83,8 +103,7 @@ python3 -m data.scripts.flores_preprocess
   
 ```
 python3 -m data.scripts.translated_split
-```  
-and:
+```
 ```
 python3 -m data.scripts.translated_big_split
 ```  
@@ -94,10 +113,11 @@ You can now work with the scripts for evaluation!
 
 
 ## How to run
-You can test all the approaches on four datasets: flores from italian to english (flores_it_en), flores from italian to spanish (flores_it_es), translated from italian to english (translated_it_en), translated from italian to spanish (translated_it_es).  
+You can test all the approaches on four datasets: flores from Italian to English (flores_it_en), flores from Italian to Spanish (flores_it_es), translated from Italian to English (translated_it_en), translated from Italian to Spanish (translated_it_es).
+With respect to the Translated dataset, as already mentioned, there are two versions available: a smaller version cleaned with our pipeline, and an already cleaned bigger version.
 The inference pipeline exploits Hydra, so adding more experiments is as easy as writing a simple YAML file. 
 ### ModernMT and GPT-3
-Experiments with gpt3 and ModernMT (read Additional data paragraph first!)  
+Experiments with GPT-3 and ModernMT (read Additional data paragraph first!)  
 
 To run ModernMT evaluation on the datasets, modify the sweeper inputs of ```./configs/config``` like this:
 ```
@@ -113,11 +133,11 @@ hydra:
 ```
 Then on the command line run: 
 ```
-python3 -m scripts.hydra_pipeline -m
+python3 -m scripts.api_translator_pipeline -m
 ```
 Notice that on the hydra_pipeline.py script there's a "test" boolean flag to perform only the first 5 translations for each dataset.  
 You will find the csv with both sentence-wise and aggregate results in ```./data/processed/metrics```.   
-Similarly, we can run experiments with gpt3. To perform translations with gpt3 it's necessary to prompt the model, our pipeline provides three strategies to do it: random, fuzzy and label (the latter available only with translated datasets).  
+Similarly, we can run experiments with GPT-3. To perform translations with GPT-3 it's necessary to prompt the model, our pipeline provides three strategies to do it: random, fuzzy and label (the latter available only with translated datasets).  
 The idea is that we will perform translations by providing few shot examples to the model; the examples are drawn from the development split of the datasets.  
 The three strategies differ on the way that examples are picked: "random" means that examples will be chosen randomly from the pool, "fuzzy" instead that the examples will be chosen according to the semantic similarity of the sentences to the source sentence that has to be translated (exploiting cosine similarity and sentence-bert embeddings).  
 "label" instead it's a more complex way to choose the example, and to use this strategy we need a pool with sentences labeled by domain (e.g. Translated dataset): the fuzzy matches for prompting are performed only on the sentences belonging to the same group as the source sentence that has to be translated.  
@@ -131,8 +151,9 @@ hydra:
   sweeper:
     params:
       datasets: flores_it_en,flores_it_es,translated_it_en,translated_it_es
-      experiments: gpt_fuzzy_3ex
+      experiments: davinci_fuzzy_3ex
 ```
+Unfortunately gpt-3.5-turbo does not offer parallel request, so it can't be evaluated on a big test set right now (keep the test mode on!).
 Then launch the script with the same command as the one for modernMT. 
 
 ### PEFT
@@ -173,6 +194,11 @@ python3 scripts/test_peft.py -m
 To run the pipelines on more than one model, pass a list of models' names to ft_models (similarly as in datasets).
 A list of available models (and relative names) is listed at the top of ```./configs/ft_config.yaml```.
 
+## Drive and Jupyter notebooks
+The cleaned Translated small dataset that you can find on the [drive folder](https://drive.google.com/drive/folders/17ZjhKB7SOU7zIb1SBZnjrBnevoU37F4-) of the challenge
+is obtained with `./notebooks/2023_03_23_translated_data_cleaning.ipynb`. The embeddings for the development sets (used in the prompting pipeline) of all the datasets are obtained with `./notebooks/2023_03_27_Embeddings.ipynb`.
+You can download the output of these notebooks by following th instructions in the `Additional data` section, and re-utilize them to produce cleaning and embeddings on new datasets.  
+(Since we didn't have access to GPUs, we used colab notebooks to perform these expensive operations). 
 ## The team
 This challenge, sponsored by Translated, was carried out by Marco Da Mommio, Mahdi Molaei and Gianfranco Romani as part of the 12th edition of Pi School's School of AI program.
 | Marco Da Mommio  | Mahdi Molaei | Gianfranco Romani |
